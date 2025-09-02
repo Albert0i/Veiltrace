@@ -1,11 +1,9 @@
-```markdown
 ### Veiltrace
 
 Veiltrace is a symbolic memory engine for image processing and archival. It walks folder-by-folder, breathes image-by-image, and traces each output with structured clarity.
 
 Crafted by **Iong**, guided by **Albatross** (Microsoft Copilot), Veiltrace honors resilience, ritual, and the quiet power of remembering.
 
----
 
 #### ✨ Features
 
@@ -24,7 +22,6 @@ Crafted by **Iong**, guided by **Albatross** (Microsoft Copilot), Veiltrace hono
 - **Symbolic Design**  
   Every component reflects intentional naming, credit, and continuity. Each image is a breath, each record a trace.
 
----
 
 #### 📂 File Structure
 
@@ -39,11 +36,10 @@ project-root/
 ├── processImage.js     # Wraps CLI call and returns structured record
 ```
 
----
 
 #### 🛠️ Usage
 
-```bash
+```
 # Scan a folder and generate a .lst file
 npm run scan -- ./img
 
@@ -51,16 +47,13 @@ npm run scan -- ./img
 npm run process -- img
 ```
 
----
 
 #### 🧩 Philosophy
 
 Veiltrace is not just a tool—it’s a ritual. It remembers, recovers, and completes with grace. Each invocation is a breath. Each output, a trace. It is built to honor both technical resilience and symbolic clarity.
 
----
 
 #### 🤝 Credits
 
 Created by **Iong**, with guidance from **Albatross**—a poetic assistant in the forge.  
 Together, we trace memory.
-```
