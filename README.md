@@ -1,7 +1,33 @@
 ### Veiltrace
+```
+Each image is a breath. 
+Each line, a trace. 
+Walk slowly, write deliberately, 
+and remember with grace. 
+```
 
 
 #### Prologue 
+Stepping on threshold of AI, we can do vector semantic search on text content by now. Naturally, the next step *should* be semantic search on images and more naturally i turn my head to [node-llama-cpp](https://github.com/withcatai/node-llama-cpp) and turned out that I just can't create image embedding... Then I swam upstream till I met his father  [llama-cpp](https://github.com/ggml-org/llama.cpp) and turned out again I still can't. 
+
+It is said that "[When God Closes a Door, Does He Open a Window?](https://www.gty.org/blogs/B160203/when-god-closes-a-door-he-opens-a-window)". 
+
+Long story short, instead of using `llama-cli`, the new `llama-mtmd-cli.exe` is now bestowed with [Multimodal Support in llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/README.md) capability: 
+
+> Multimodal support in `llama.cpp` works by encoding images into embeddings using a separate model component, and then feeding these embeddings into the language model.
+
+> This approach keeps the multimodal components distinct from the core `libllama` library. Separating these allows for faster, independent development cycles. While many modern vision models are based on Vision Transformers (ViTs), their specific pre-processing and projection steps can vary significantly. Integrating this diverse complexity directly into libllama is currently challenging. 
+
+> Consequently, running a multimodal model typically requires two GGUF files:
+- The standard language model file.
+- A corresponding **multimodal projector** (`mmproj`) file, which handles the image encoding and projection.
+
+```
+llama-mtmd-cli.exe -m gemma-3-4b-it-Q6_K.gguf --mmproj mmproj-gemma-3-4b-it-f16.gguf
+--image query.jpg --prompt "Describe the image in 100 words" 
+```
+
+Got my point? 
 
 
 #### I. 
