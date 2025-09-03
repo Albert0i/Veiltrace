@@ -30,8 +30,12 @@ llama-mtmd-cli.exe ^
 
 Got my point? Instead of creating vector embedding from images directly, we can extract text desctiption from images, then we can search via text description. Or, further vectorizing the text description. 
 
+Download the models from here: 
+- [google_gemma-3-4b-it-GGUF](https://huggingface.co/bartowski/google_gemma-3-4b-it-GGUF/blob/main/google_gemma-3-4b-it-Q6_K.gguf)
+- [mmproj-google_gemma-3-4b-it-f16.gguf](https://huggingface.co/bartowski/google_gemma-3-4b-it-GGUF/blob/main/mmproj-google_gemma-3-4b-it-f16.gguf)
 
-#### I. 
+
+#### I. System Design 
 
 
 #### II. 
