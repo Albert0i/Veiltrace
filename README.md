@@ -8,11 +8,9 @@ and remember with grace.
 
 
 #### Prologue 
-Stepping on threshold of AI, we can do vector semantic search on text content by now. Naturally, the next step *should* be semantic search on images and more naturally i turn my head to [node-llama-cpp](https://github.com/withcatai/node-llama-cpp) and turned out that I just can't create image embedding... Then I swam upstream till I met his father  [llama-cpp](https://github.com/ggml-org/llama.cpp) and turned out again I still can't. 
+Stepping on threshold of AI, I can do vector semantic search on text content by now. Naturally, the next step *should* be semantic search on images and more naturally i turn eyes on [node-llama-cpp](https://github.com/withcatai/node-llama-cpp) and found out that I can't... then I swam upstream till I met the father  [llama-cpp](https://github.com/ggml-org/llama.cpp) and found out that I still can't... 
 
-It is said that "[When God Closes a Door, Does He Open a Window?](https://www.gty.org/blogs/B160203/when-god-closes-a-door-he-opens-a-window)". 
-
-Long story short, instead of using `llama-cli`, the new `llama-mtmd-cli.exe` is now bestowed with [Multimodal Support in llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/README.md) capability: 
+It is said that "[When God Closes a Door, Does He Open a Window?](https://www.gty.org/blogs/B160203/when-god-closes-a-door-he-opens-a-window)". The [Multimodal Support in llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/README.md) capability is bestowed upon `llama-cpp` via the new `llama-mtmd-cli`.
 
 > Multimodal support in `llama.cpp` works by encoding images into embeddings using a separate model component, and then feeding these embeddings into the language model.
 
@@ -23,11 +21,14 @@ Long story short, instead of using `llama-cli`, the new `llama-mtmd-cli.exe` is 
 - A corresponding **multimodal projector** (`mmproj`) file, which handles the image encoding and projection.
 
 ```
-llama-mtmd-cli.exe -m gemma-3-4b-it-Q6_K.gguf --mmproj mmproj-gemma-3-4b-it-f16.gguf
---image query.jpg --prompt "Describe the image in 100 words" 
+llama-mtmd-cli.exe ^
+  -m gemma-3-4b-it-Q6_K.gguf ^
+  --mmproj mmproj-gemma-3-4b-it-f16.gguf ^
+  --image query.jpg ^
+  --prompt "Describe the image in 100 words"
 ```
 
-Got my point? 
+Got my point? Instead of creating vector embedding from images directly, we can extract text info from images, then search via text description. Or, further vectorize the on text description. 
 
 
 #### I. 
