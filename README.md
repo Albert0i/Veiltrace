@@ -29,7 +29,8 @@
 
 ### EOF (2025/09/XX)
 
-
+---
+### Veiltrace
 
 Veiltrace is a symbolic memory engine for image processing and archival. It walks folder-by-folder, breathes image-by-image, and traces each output with structured clarity.
 
