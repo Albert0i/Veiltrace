@@ -8,9 +8,9 @@ and remember with grace.
 
 
 #### Prologue 
-Stepping on threshold of AI, I can do vector semantic search on text content by now. Naturally, the next step *should* be semantic search on images and more naturally i turn eyes on [node-llama-cpp](https://github.com/withcatai/node-llama-cpp) and found out that I can't... then I swam upstream till I met the father  [llama-cpp](https://github.com/ggml-org/llama.cpp) and found out that I still can't... 
+Stepping on threshold of AI, I can do vector semantic search on text content by now. Naturally, the next step *should* be semantic search on images and more naturally turing my eyes on [node-llama-cpp](https://github.com/withcatai/node-llama-cpp) but found out that I can't... then swimming upstream till I met the father [llama-cpp](https://github.com/ggml-org/llama.cpp) and found out that I still can't... 
 
-It is said that "[When God Closes a Door, Does He Open a Window?](https://www.gty.org/blogs/B160203/when-god-closes-a-door-he-opens-a-window)". The [Multimodal Support in llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/README.md) capability is bestowed upon `llama-cpp` via the new `llama-mtmd-cli`.
+It is said that "[When God Closes a Door, Does He Open a Window?](https://www.gty.org/blogs/B160203/when-god-closes-a-door-he-opens-a-window)". The [Multimodal Support in llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/README.md) capability is now bestowed upon `llama-cpp` via the new `llama-mtmd-cli`.
 
 > Multimodal support in `llama.cpp` works by encoding images into embeddings using a separate model component, and then feeding these embeddings into the language model.
 
@@ -28,7 +28,7 @@ llama-mtmd-cli.exe ^
   --prompt "Describe the image in 100 words"
 ```
 
-Got my point? Instead of creating vector embedding from images directly, we can extract text info from images, then search via text description. Or, further vectorize the on text description. 
+Got my point? Instead of creating vector embedding from images directly, we can extract text desctiption from images, then we can search via text description. Or, further vectorizing the text description. 
 
 
 #### I. 
