@@ -38,11 +38,10 @@ const PROMPT = 'Describe the image in detail, using approximately 300 words. Str
 export async function processImage(imagePath) {
   return new Promise((resolve, reject) => {
     const imageName = path.basename(imagePath);
-    // '--image', imagePath.replace(/\\/g, '/'),
     const args = [
       '-m', MODEL,
       '--mmproj', MMPROJ,
-      '--image', `"${imagePath.replace(/\\/g, '/')}"`,
+      '--image', imagePath.replace(/\\/g, '/'),
       '--prompt', PROMPT
     ];
 
@@ -76,27 +75,15 @@ export async function processImage(imagePath) {
 
       try {
         const stats = fs.statSync(imagePath);
-        // const description = stdout.trim().replace(/\s+/g, ' ');
-        // const record = {
-        //   imageName,
-        //   fullPath: imagePath,
-        //   fileFormat: path.extname(imageName).slice(1),
-        //   fileSizeKB: Math.round(stats.size / 1024),
-        //   createdAt: stats.birthtime.toISOString(),
-        //   description: description || '[EMPTY OUTPUT]'
-        // };
         const description = stdout.trim().replace(/\s+/g, ' ');
-        const isValid = description.includes('[START]') || description.length > 100;
-        
         const record = {
           imageName,
           fullPath: imagePath,
           fileFormat: path.extname(imageName).slice(1),
           fileSizeKB: Math.round(stats.size / 1024),
           createdAt: stats.birthtime.toISOString(),
-          description: isValid ? description : '[FAILED TO GENERATE DESCRIPTION]'
+          description: description || '[EMPTY OUTPUT]'
         };
-
         resolve(record);
       } catch (err) {
         reject(new Error(`[ERROR] Failed to finalize record for ${imageName}: ${err.message}`));
