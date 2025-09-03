@@ -88,6 +88,11 @@ export async function processImage(imagePath) {
         const description = stdout.trim().replace(/\s+/g, ' ');
         const isValid = description.includes('[START]') || description.length > 100;
         
+        // Log failed descriptions to STDERR
+        if (!isValid) {
+          console.error(`[ERROR] Failed to generate description, imagePath = ${imagePath}`);
+        }
+
         const record = {
           imageName,
           fullPath: imagePath,
