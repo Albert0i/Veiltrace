@@ -93,13 +93,14 @@ export async function processImage(imagePath) {
           console.error(`[ERROR] Failed to generate description, imagePath = ${imagePath}`);
         }
 
+        // description: isValid ? description : '[FAILED TO GENERATE DESCRIPTION]'
         const record = {
           imageName,
           fullPath: imagePath,
           fileFormat: path.extname(imageName).slice(1),
           fileSizeKB: Math.round(stats.size / 1024),
           createdAt: stats.birthtime.toISOString(),
-          description: isValid ? description : '[FAILED TO GENERATE DESCRIPTION]'
+          description: description || '[EMPTY OUTPUT]'
         };
 
         resolve(record);
