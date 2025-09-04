@@ -12,19 +12,17 @@
 
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
-//import { processImage } from './utils.js'; // External async function
-import { processImage } from './processImage.js'; // External async function
+import { processImage } from './utils.js'; // External async function
 
 // Parse CLI argument or default to "img"
-const folderName = process.argv[2]?.trim() || 'img';
+const userArgs = Array.isArray(process.argv) ? process.argv.slice(2) : [];
+const folderName = userArgs[0]?.trim() || 'img';
 
-// Define paths for .lst, .sav, .jsonl, and .fail.lst
+// Define paths for .lst, .sav, and .jsonl
 const dataDir = path.resolve('./data');
 const lstPath = path.join(dataDir, `${folderName}.lst`);
 const savPath = path.join(dataDir, `${folderName}.sav`);
 const jsonlPath = path.join(dataDir, `${folderName}.jsonl`);
-const failListPath = path.join(dataDir, `${folderName}.fail.lst`);
 
 /**
  * Reads non-empty lines from .lst file
@@ -51,26 +49,10 @@ function appendJsonl(record) {
 }
 
 /**
- * Checks if a string contains only ASCII characters
- */
-function isAsciiSafe(str) {
-  return /^[\x00-\x7F]*$/.test(str);
-}
-
-/**
- * Copies image to temp folder if path is not ASCII-safe
- */
-function getSafePath(imagePath) {
-  if (isAsciiSafe(imagePath)) return imagePath;
-
-  const tempPath = path.join(os.tmpdir(), 'veiltrace.jpg');
-  console.log(`📁 \tCopy ${imagePath} → ${tempPath}...`);
-  fs.copyFileSync(imagePath, tempPath);
-  return tempPath;
-}
-
-/**
- * Main processing logic
+ * Main processing logic:
+ * - Handles three cases: fresh start, resume, already finished
+ * - Calls processImage() for each image path
+ * - Writes progress to .sav and output to .jsonl
  */
 async function main() {
   const startTime = Date.now();
@@ -91,13 +73,12 @@ async function main() {
     return;
   }
 
-  // Case 1: .lst exists, .sav missing → start fresh
+  // Case 1: .sav missing → start fresh
   let startIndex = 0;
 
-  // Case 3: .lst and .sav exist, .sav has content → resume
+  // Case 3: .sav exists and has content → resume from saved entry
   if (savExists && savContent !== '') {
     startIndex = entries.findIndex(line => line === savContent);
-
     if (startIndex === -1) {
       console.error(`[ERROR] Entry in .sav not found in .lst: "${savContent}"`);
       process.exit(1);
@@ -111,39 +92,12 @@ async function main() {
     const imagePath = entries[i];
     writeSav(imagePath); // Save progress
 
-    const safePath = getSafePath(imagePath); // Use fallback if needed
-
     try {
-      const record = await processImage(safePath); // External async call
-      const description = record.description?.trim() || '';
-      //const isValid = description.length > 100 || description.includes('[START]');
-      const isValid = description.length > 100;
-
-      if (!isValid) {
-        record.description = '[FAILED TO GENERATE DESCRIPTION]';
-        fs.appendFileSync(failListPath, imagePath + '\n');
-      }
-
-      // Change back to original image name and full path 
-      if (safePath !== imagePath && fs.existsSync(safePath)) {
-        record.imageName = path.basename(imagePath);
-        record.fullPath = imagePath;
-      }
+      const record = await processImage(imagePath); // External async call
       appendJsonl(record); // Write structured output
       console.log(`✅ Processed: ${record.imageName}`);
     } catch (err) {
       console.error(`[ERROR] Failed to process ${imagePath}: ${err.message}`);
-      fs.appendFileSync(failListPath, imagePath + '\n');
-    } finally {
-      // Clean up temp file if used
-      if (safePath !== imagePath && fs.existsSync(safePath)) {
-        try {
-          console.log(`📁 \tRemove ${safePath}...`);
-          fs.unlinkSync(safePath);
-        } catch (e) {
-          console.warn(`[WARN] Failed to delete temp file: ${safePath}`);
-        }
-      }
     }
   }
 
@@ -153,11 +107,10 @@ async function main() {
 
   console.log(`✅ Finished processing ${entries.length - startIndex} entries`);
   console.log(`📄 Output saved to: ${jsonlPath}`);
-  console.log(`📄 Failures logged to: ${failListPath}`);
   console.log(`⏱️ Time spent: ${durationSec} seconds`);
 }
 
 /*
-   main
+   main 
 */
 main();
