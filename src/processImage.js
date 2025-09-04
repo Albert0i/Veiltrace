@@ -12,6 +12,8 @@ const MMPROJ = path.join(MODELS, 'mmproj-gemma-3-4b-it-f16.gguf');
 const PROMPT = 'Describe the image in detail, using approximately 300 words. Structure your response into three paragraphs, separated by "[BREAK]". Begin your answer with "[START]".';
 
 export async function processImage(imagePath) {
+  console.log(`🧠\tProcessing "${imagePath}"...`);
+
   return new Promise((resolve, reject) => {
     const imageName = path.basename(imagePath);
     const args = [

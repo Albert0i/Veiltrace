@@ -5,12 +5,20 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "chat":"bin\\llama-mtmd-cli.exe -m models\\gemma-3-4b-it-Q6_K.gguf --mmproj models\\mmproj-gemma-3-4b-it-f16.gguf",
+    "chat": "bin\\llama-mtmd-cli.exe -m models\\gemma-3-4b-it-Q6_K.gguf --mmproj models\\mmproj-gemma-3-4b-it-f16.gguf",
     "scan": "node src/scanFolder.js",
     "process": "node src/processFolder.js"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "^6.15.0",
+    "prisma": "^6.15.0",
+    "sharp": "^0.34.3"
+  }
 }

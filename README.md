@@ -6,6 +6,9 @@ Walk slowly, write deliberately,
 and remember with grace. 
 ```
 
+> "Physical strength is enough only up to a certain point; who can help it if that very point is also very significant otherwise? No one can help it. That’s the way the world corrects itself in its course and keeps its balance. It’s an excellent, incredibly excellent arrangement, although dismal in other respects."
+
+> "Things that one usually dared not mention must be told to him openly, for otherwise he wouldn’t understand the most essential point."
 
 #### Prologue 
 Stepping on threshold of AI, I can do vector semantic search on text content by now. Naturally, the next step *should* be semantic search on images and more naturally turing my eyes on [node-llama-cpp](https://github.com/withcatai/node-llama-cpp) but found out that I can't... then swimming upstream till I met the father [llama-cpp](https://github.com/ggml-org/llama.cpp) and found out that I still can't... 
