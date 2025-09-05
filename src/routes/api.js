@@ -105,27 +105,25 @@ router.get('/type', async (req, res) => {
   res.json(formats);
 });
 
+// ─── GET /search?s=xxx ────────────────────────────────────────────
 router.get('/search', async (req, res) => {
   const query = req.query.s?.trim();
+  const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
+  const offset = parseInt(req.query.offset) || 0;
+  const limit = parseInt(req.query.limit) || 20;
+
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
-  const results = await prisma.$queryRaw`
-      SELECT id,
-        MATCH(description) AGAINST(${query}) AS relevance
-      FROM imagetrace
-      WHERE MATCH(description) AGAINST(${query})
-      ORDER BY relevance DESC
-      LIMIT 20;
-    `;
+  const result = await prisma.$queryRawUnsafe(`
+        SELECT  id,
+                MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
+        FROM imagetrace
+        WHERE MATCH(description) AGAINST(? IN ${mode} MODE)
+        ORDER BY relevance DESC
+        LIMIT ? OFFSET ?;
+      `, query, query, limit, offset);
 
-  res.json(results);
+  res.status(result.length>0?200:404).json(result);
 });
-
-// // ─── GET /search ──────────────────────────────────────────────
-// router.get('/search', async (req, res) => {
-//   const query = req.query.s || '';
-//   const results = await IImageTrace.search(query);
-//   res.json(results);
-// });
 
 export default router;
