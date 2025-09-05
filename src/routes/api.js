@@ -85,6 +85,24 @@ router.get('/source/:id', async (req, res) => {
     return res.status(404).send('Image not found on disk');
   }
 
+  // update imagetrace 
+  const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  const r1 = await prisma.imageTrace.update({
+    where: { id }, // or use another unique field like fullPath
+    data: {
+      visited: { increment: 1 },         // increment visit count
+      updatedAt: updatedAt.toISOString() // set to current timestamp
+    }
+  });
+  // update vistatrace 
+  const r2 = await prisma.vistaTrace.create({
+    data: {
+      imageId: id,                        // ID of the image being accessed
+      createdAt: updatedAt.toISOString()  // set to current timestamp
+    }
+  });
+  //console.log('r1 =', r1, ', r2 =', r2)
+
   const mimeType = mime.getType(filePath) || 'application/octet-stream';
   res.setHeader('Content-Type', mimeType);
   res.status(200).sendFile(filePath);
@@ -146,6 +164,29 @@ router.get('/presearch', async (req, res) => {
   res.status(200).json( { count: Number(countResult[0]?.count) } );
 });
 
+// ─── GET /presearch?s=xxx─────────────────────────────────────────
+router.get('/status', async (req, res) => {
+  const [{ version }] = await prisma.$queryRaw`SELECT VERSION() AS version`;
+  const numImages = await prisma.ImageTrace.count()
+  const [{ _, size }] = await await prisma.$queryRaw`
+                            SELECT table_name AS 'table',
+                                    ROUND((data_length + index_length) / 1024 / 1024, 2) AS 'size'
+                            FROM information_schema.tables
+                            WHERE table_schema = 'veiltrace' AND table_name = 'imagetrace';
+                            `;
+  const visited = await prisma.ImageTrace.count({ 
+    where: {
+      visited: { gt: 0 }
+    }
+  })
+
+  res.status(200).json( { 
+                          version,
+                          numImages,
+                          size, 
+                          visited, 
+                      } );
+});
 
 export default router;
 
