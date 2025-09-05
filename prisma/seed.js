@@ -21,7 +21,7 @@ const DEFAULT_JSNOL = './data/img.jsonl'  // Default jsonl to seed
 const DEFAULT_MINIATURE = 128             // Size of miniature
 
 const prisma = new PrismaClient();
-const jsonlPath = path.resolve(DEFAULT_JSNOL);
+const jsonlPath = path.resolve(process.argv[2] || DEFAULT_JSNOL);
 
 async function seed() {
   const stream = fs.createReadStream(jsonlPath, { encoding: 'utf8' });
@@ -29,6 +29,7 @@ async function seed() {
 
   let count = 0;
 
+  console.log('Seeding from', jsonlPath);
   for await (const line of rl) {
     const trimmed = line.trim();
     if (!trimmed) continue;
@@ -38,7 +39,8 @@ async function seed() {
 
       // Normalize timestamps      
       const createdAt = new Date(record.createdAt || Date.now());
-      const indexedAt = new Date(Date.now());
+      //const indexedAt = new Date(Date.now());
+      const indexedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
       const { meta, content } = splitDescription(record.description, '\n\n');
 
       const miniature = await sharp(record.fullPath)

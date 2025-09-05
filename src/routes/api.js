@@ -105,20 +105,22 @@ router.get('/type', async (req, res) => {
   res.json(formats);
 });
 
-// ─── GET /search?s=xxx ────────────────────────────────────────────
+// ─── GET /search?s=xxx&offset=10&limit=10&expansion=true──────────
 router.get('/search', async (req, res) => {
   const query = req.query.s?.trim();
   const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
   const offset = parseInt(req.query.offset) || 0;
   const limit = parseInt(req.query.limit) || 20;
+  const expansion = req.query.expansion === 'true'; // ← default is false
 
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
+  const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
   const result = await prisma.$queryRawUnsafe(`
         SELECT  id,
                 MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
         FROM imagetrace
-        WHERE MATCH(description) AGAINST(? IN ${mode} MODE)
+        WHERE MATCH(description) AGAINST(? ${modifier})
         ORDER BY relevance DESC
         LIMIT ? OFFSET ?;
       `, query, query, limit, offset);
@@ -126,4 +128,33 @@ router.get('/search', async (req, res) => {
   res.status(result.length>0?200:404).json(result);
 });
 
+// ─── GET /presearch?s=xxx─────────────────────────────────────────
+router.get('/presearch', async (req, res) => {
+  const query = req.query.s?.trim();
+  const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
+  const offset = parseInt(req.query.offset) || 0;
+  const limit = parseInt(req.query.limit) || 20;
+  const expansion = req.query.expansion === 'true'; // ← default is false
+
+  if (!query) return res.status(400).json({ error: 'Missing search query' });
+
+  const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
+  const result = await prisma.$queryRawUnsafe(`
+        SELECT  id,
+                MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
+        FROM imagetrace
+        WHERE MATCH(description) AGAINST(? ${modifier})
+        ORDER BY relevance DESC
+        LIMIT ? OFFSET ?;
+      `, query, query, limit, offset);
+
+  res.status(result.length>0?200:404).json(result);
+});
+
+
 export default router;
+
+/*
+   Full-Text Index Overview
+   https://mariadb.com/docs/server/ha-and-performance/optimization-and-tuning/optimization-and-indexes/full-text-indexes/full-text-index-overview
+*/

@@ -32,10 +32,11 @@ model ImageTrace {
 
   vistas VistaTrace[] // ← One-to-many relationship
 
-  @@unique([fullPath])
-  @@index([fileFormat])
-  @@index([createdAt])
-  @@fulltext([description], map: "idx_imagetrace_fts")
+  @@unique([fullPath], map: "uniq_image_fullpath")
+  @@index([fileFormat], map: "idx_image_format")
+  @@index([createdAt], map: "idx_image_created")
+  @@index([visited], map: "idx_image_visited")
+  @@fulltext([description], map: "fts_image_description")
 }
 
 model VistaTrace {
@@ -47,5 +48,5 @@ model VistaTrace {
   createdAt   String // ISO format: "2025-09-01T08:10:11.862Z"
   updateIdent Int    @default(0)
 
-  @@index([imageId])
+  @@index([imageId], map: "idx_vista_image_ref")
 }
