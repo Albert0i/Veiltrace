@@ -11,7 +11,9 @@
 import express from 'express';
 // Prisma 
 import { PrismaClient } from '../../src/generated/prisma/index.js'; 
+import path from 'path';
 import fs from 'fs';
+import mime from 'mime';
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -46,24 +48,47 @@ router.get('/vista/:imageId', async (req, res) => {
   res.status(result.length>0?200:404).json(result);
 });
 
-// // ─── GET /preview/:id ─────────────────────────────────────────
-// router.get('/preview/:id', async (req, res) => {
-//   const id = parseInt(req.params.id);
-//   const miniature = await IImageTrace.getMiniature(id);
-//   if (!miniature) return res.status(404).send('Miniature not found');
-//   res.set('Content-Type', 'image/jpeg');
-//   res.send(miniature);
-// });
+// ─── GET /preview/:id ─────────────────────────────────────────
+router.get('/preview/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const result = await prisma.imageTrace.findUnique({
+    where: { id }, 
+    select: { 
+      miniature: true
+    }
+  })
+  
+  if (!result?.miniature) {
+    return res.status(404).send('Preview not found');
+  }
 
-// // ─── GET /original/:id ────────────────────────────────────────
-// router.get('/original/:id', async (req, res) => {
-//   const id = parseInt(req.params.id);
-//   const fullPath = await IImageTrace.getOriginalPath(id);
-//   if (!fullPath || !fs.existsSync(fullPath)) {
-//     return res.status(404).send('Original image not found');
-//   }
-//   res.sendFile(fullPath);
-// });
+  res.set('Content-Type', 'image/jpeg'); // or 'image/png' if needed
+  res.status(200).send(result.miniature);            // Send binary buffer directly
+});
+
+// ─── GET /source/:id ─────────────────────────────────────────
+router.get('/source/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const result = await prisma.imageTrace.findUnique({
+    where: { id }, 
+    select: { 
+      fullPath: true
+    }
+  })
+
+  if (!result || !result.fullPath) {
+    return res.status(404).send('Image not found');
+  }
+
+  const filePath = path.resolve(result.fullPath);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send('Image not found on disk');
+  }
+
+  const mimeType = mime.getType(filePath) || 'application/octet-stream';
+  res.setHeader('Content-Type', mimeType);
+  res.status(200).sendFile(filePath);
+});
 
 // // ─── GET /search ──────────────────────────────────────────────
 // router.get('/search', async (req, res) => {
@@ -72,10 +97,19 @@ router.get('/vista/:imageId', async (req, res) => {
 //   res.json(results);
 // });
 
-// // ─── GET /types ───────────────────────────────────────────────
-// router.get('/types', async (req, res) => {
-//   const types = await IImageTrace.getTypes();
-//   res.json(types);
-// });
+// ─── GET /types ───────────────────────────────────────────────
+router.get('/type', async (req, res) => {
+  const result = await prisma.imageTrace.groupBy({
+    by: ['fileFormat'],
+    _count: { fileFormat: true }
+  });
+  
+  const formats = result.map(entry => ({
+    fileFormat: entry.fileFormat,
+    count: entry._count.fileFormat
+  }));  
+
+  res.json(formats);
+});
 
 export default router;
