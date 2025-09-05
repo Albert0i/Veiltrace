@@ -168,6 +168,7 @@ router.get('/presearch', async (req, res) => {
 router.get('/status', async (req, res) => {
   const [{ version }] = await prisma.$queryRaw`SELECT VERSION() AS version`;
   const numImages = await prisma.ImageTrace.count()
+  const numVistas = await prisma.VistaTrace.count()
   const [{ _, size }] = await await prisma.$queryRaw`
                             SELECT table_name AS 'table',
                                     ROUND((data_length + index_length) / 1024 / 1024, 2) AS 'size'
@@ -183,6 +184,7 @@ router.get('/status', async (req, res) => {
   res.status(200).json( { 
                           version,
                           numImages,
+                          numVistas, 
                           size, 
                           visited, 
                       } );
