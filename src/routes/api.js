@@ -173,7 +173,8 @@ router.get('/status', async (req, res) => {
                             SELECT table_name AS 'table',
                                     ROUND((data_length + index_length) / 1024 / 1024, 2) AS 'size'
                             FROM information_schema.tables
-                            WHERE table_schema = 'veiltrace' AND table_name = 'imagetrace';
+                            WHERE table_schema = 'veiltrace' AND 
+                                  table_name in ('imagetrace', 'vistatrace');
                             `;
   const visited = await prisma.ImageTrace.count({ 
     where: {
