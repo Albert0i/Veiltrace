@@ -15,6 +15,7 @@ import path from 'path';
 import sharp from 'sharp';
 // Prisma 
 import { PrismaClient } from '../src/generated/prisma/index.js'; 
+import { splitDescription } from '../src/utils.js'
 
 const DEFAULT_JSNOL = './data/img.jsonl'  // Default jsonl to seed 
 const DEFAULT_MINIATURE = 128             // Size of miniature
@@ -35,8 +36,10 @@ async function seed() {
     try {
       const record = JSON.parse(trimmed);
 
-      // Normalize timestamps
+      // Normalize timestamps      
       const createdAt = new Date(record.createdAt || Date.now());
+      const indexedAt = new Date(Date.now());
+      const { meta, content } = splitDescription(record.description, '\n\n');
 
       const miniature = await sharp(record.fullPath)
         .resize(DEFAULT_MINIATURE, DEFAULT_MINIATURE, { fit: 'cover' })
@@ -51,12 +54,13 @@ async function seed() {
         create: {
           imageName: record.imageName,
           fullPath: record.fullPath,
-          fileFormat: record.fileFormat,
+          fileFormat: record.fileFormat.toUpperCase(),
           fileSize: record.fileSizeKB,
-          meta: record.meta || '',
-          description: record.description || '',
+          meta, 
+          description: content,
           miniature,
-          createdAt
+          indexedAt: indexedAt.toISOString(),
+          createdAt: createdAt.toISOString()
         }
       });
 

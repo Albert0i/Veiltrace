@@ -110,3 +110,31 @@ export async function processImage(imagePath) {
     });
   });
 }
+
+
+/**
+ * ┌────────────────────────────────────────────────────────────┐
+ * │                                                            │
+ * │   Veiltrace: Description Splitter                          │
+ * │                                                            │
+ * │   Splits description into meta and content.                │
+ * │   Replaces [BREAK] with symbolic separator.                │
+ * │                                                            │
+ * └────────────────────────────────────────────────────────────┘
+ */
+
+export function splitDescription(description, breakReplacement = '\n\n') {
+  if (typeof description !== 'string') return { meta: '', content: '' };
+
+  const [metaPart, mainPartRaw] = description.split('[START]');
+  const meta = (metaPart || '').trim();
+
+  const content = (mainPartRaw || '')
+    .trim()
+    .split('[BREAK]')
+    .map(p => p.trim())
+    .join(breakReplacement);
+
+  return { meta, content };
+}
+

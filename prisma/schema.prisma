@@ -15,21 +15,37 @@ datasource db {
 }
 
 model ImageTrace {
-  id           Int      @id @default(autoincrement())
-  imageName    String
-  fullPath     String
-  fileFormat   String
-  fileSize     Int
-  meta         String   @db.Text        // Optional metadata, tags, or symbolic notes
-  description  String   @db.Text        // Symbolic summary or generated trace
-  miniature    Bytes?                   // 256×256 thumbnail stored as binary
+  id          Int    @id @default(autoincrement())
+  imageName   String
+  fullPath    String
+  fileFormat  String
+  fileSize    Int
+  meta        String @db.Text // Optional metadata, tags, or symbolic notes
+  description String @db.Text // Symbolic summary or generated trace
+  miniature   Bytes? // 256×256 thumbnail stored as binary
 
-  visited      Int      @default(0)
-  updatedAt    DateTime?                // ISO format: "2025-09-01T08:10:11.862Z"
-  indexeddAt   DateTime @default(now()) // ISO format: "2025-09-01T08:10:11.862Z"
-  createdAt    DateTime                 // ISO format: "2025-09-01T08:10:11.862Z"
-  updateIdent  Int      @default(0)
+  visited     Int     @default(0)
+  updatedAt   String? // ISO format: "2025-09-01T08:10:11.862Z"
+  indexedAt   String // ISO format: "2025-09-01T08:10:11.862Z"
+  createdAt   String // ISO format: "2025-09-01T08:10:11.862Z"
+  updateIdent Int     @default(0)
+
+  vistas VistaTrace[] // ← One-to-many relationship
 
   @@unique([fullPath])
+  @@index([fileFormat])
+  @@index([createdAt])
   @@fulltext([description], map: "idx_imagetrace_fts")
+}
+
+model VistaTrace {
+  id Int @id @default(autoincrement())
+
+  image   ImageTrace @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  imageId Int
+
+  createdAt   String // ISO format: "2025-09-01T08:10:11.862Z"
+  updateIdent Int    @default(0)
+
+  @@index([imageId])
 }
