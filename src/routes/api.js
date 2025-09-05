@@ -62,8 +62,8 @@ router.get('/preview/:id', async (req, res) => {
     return res.status(404).send('Preview not found');
   }
 
-  res.set('Content-Type', 'image/jpeg'); // or 'image/png' if needed
-  res.status(200).send(result.miniature);            // Send binary buffer directly
+  res.set('Content-Type', 'image/jpeg');  // or 'image/png' if needed
+  res.status(200).send(result.miniature); // Send binary buffer directly
 });
 
 // ─── GET /source/:id ─────────────────────────────────────────
