@@ -45,7 +45,7 @@ router.get('/vista/:imageId', async (req, res) => {
       }
   })
 
-  res.status(result.length>0?200:404).json(result);
+  res.status(result.length>0?200:204).json(result);
 });
 
 // ─── GET /preview/:id ─────────────────────────────────────────
@@ -143,7 +143,7 @@ router.get('/search', async (req, res) => {
         LIMIT ? OFFSET ?;
       `, query, query, limit, offset);
 
-  res.status(result.length>0?200:404).json(result);
+  res.status(result.length>0?200:204).json(result);
 });
 
 // ─── GET /presearch?s=xxx─────────────────────────────────────────
@@ -161,7 +161,8 @@ router.get('/presearch', async (req, res) => {
         WHERE MATCH(description) AGAINST(? ${modifier})
       `, query);
   // countResult = [ { count: 4n } ]
-  res.status(200).json( { count: Number(countResult[0]?.count) } );
+  const count = Number(countResult[0]?.count)
+  res.status(count>0?200:204).json( { count } );
 });
 
 // ─── GET /presearch?s=xxx─────────────────────────────────────────
@@ -196,4 +197,7 @@ export default router;
 /*
    Full-Text Index Overview
    https://mariadb.com/docs/server/ha-and-performance/optimization-and-tuning/optimization-and-indexes/full-text-indexes/full-text-index-overview
+
+   CRUD
+   https://www.prisma.io/docs/orm/prisma-client/queries/crud
 */
