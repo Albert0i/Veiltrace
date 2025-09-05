@@ -90,13 +90,6 @@ router.get('/source/:id', async (req, res) => {
   res.status(200).sendFile(filePath);
 });
 
-// // ─── GET /search ──────────────────────────────────────────────
-// router.get('/search', async (req, res) => {
-//   const query = req.query.s || '';
-//   const results = await IImageTrace.search(query);
-//   res.json(results);
-// });
-
 // ─── GET /types ───────────────────────────────────────────────
 router.get('/type', async (req, res) => {
   const result = await prisma.imageTrace.groupBy({
@@ -111,5 +104,28 @@ router.get('/type', async (req, res) => {
 
   res.json(formats);
 });
+
+router.get('/search', async (req, res) => {
+  const query = req.query.s?.trim();
+  if (!query) return res.status(400).json({ error: 'Missing search query' });
+
+  const results = await prisma.$queryRaw`
+      SELECT id,
+        MATCH(description) AGAINST(${query}) AS relevance
+      FROM imagetrace
+      WHERE MATCH(description) AGAINST(${query})
+      ORDER BY relevance DESC
+      LIMIT 20;
+    `;
+
+  res.json(results);
+});
+
+// // ─── GET /search ──────────────────────────────────────────────
+// router.get('/search', async (req, res) => {
+//   const query = req.query.s || '';
+//   const results = await IImageTrace.search(query);
+//   res.json(results);
+// });
 
 export default router;
