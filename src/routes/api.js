@@ -132,23 +132,18 @@ router.get('/search', async (req, res) => {
 router.get('/presearch', async (req, res) => {
   const query = req.query.s?.trim();
   const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
-  const offset = parseInt(req.query.offset) || 0;
-  const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
   const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
-  const result = await prisma.$queryRawUnsafe(`
-        SELECT  id,
-                MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
+  const countResult = await prisma.$queryRawUnsafe(`
+        SELECT  count(*) as count
         FROM imagetrace
         WHERE MATCH(description) AGAINST(? ${modifier})
-        ORDER BY relevance DESC
-        LIMIT ? OFFSET ?;
-      `, query, query, limit, offset);
-
-  res.status(result.length>0?200:404).json(result);
+      `, query);
+  // countResult = [ { count: 4n } ]
+  res.status(200).json( { count: Number(countResult[0]?.count) } );
 });
 
 
