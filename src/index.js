@@ -1,48 +1,41 @@
-/**
- * ┌────────────────────────────────────────────────────────────┐
- * │                                                            │
- * │   Veiltrace: Express Entry Point                           │
- * │                                                            │
- * │   Breathes form data, JSON, cookies, and symbolic routes   │
- * │   Crafted by Iong, guided by Albatross                     │
- * │                                                            │
- * └────────────────────────────────────────────────────────────┘
- */
-
-import 'dotenv/config'
+// app.js
 import express from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
-import apiRoutes from './routes/api.js';
-import viewRoutes from './routes/view.js';
+//import indexRouter from './routes/index.js';
+import apiRouter from './routes/api.js';
+//import imgRoute from './routes/imgroute.js';
+//import mdRoute from './routes/mdroute.js';
+//import { redis } from './redis/redis.js'
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
-// ─── Middleware Rituals ────────────────────────────────────────
-app.use(express.urlencoded({ extended: true })); // Handles form POSTs
-app.use(express.json());                         // Handles JSON POSTs
-app.use(cookieParser());                         // Parses cookies
-
-// ─── Static & View Setup ───────────────────────────────────────
-app.use(express.static(path.join(process.cwd(), 'public')));
 app.set('view engine', 'ejs');
-app.set('views', path.join(process.cwd(), 'views'));
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── Route Mounting ────────────────────────────────────────────
-app.use('/api/v1/img', apiRoutes); // Backend API routes
-app.use('/img', viewRoutes);       // Frontend EJS routes
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieParser());
 
-// ─── Root Redirect or Welcome ──────────────────────────────────
-app.get('/', (req, res) => {
-  res.redirect('/img/search');
-});
+// app.use('/', indexRouter);
+// app.use('/', mdRoute);
+app.use('/api/v1/image', apiRouter);
+//app.use('/img', imgRoute);
 
-// ─── Server Start ──────────────────────────────────────────────
+// Start server
+const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`🚀 Veiltrace backend breathing on port ${PORT}`);
-});
+  console.log(`Server running at http://${HOST}:${PORT}`);
+} ).on('error', (error) => {
+  throw new Error(error.message)
+} );
 
 process.on('SIGINT', async () => {
   console.log('Caught Ctrl+C (SIGINT). Cleaning up...');

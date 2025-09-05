@@ -1,0 +1,6 @@
+
+HOST=localhost
+
+PORT=3000
+
+DATABASE_URL="mysql://root:root@localhost:3306/veiltrace"
