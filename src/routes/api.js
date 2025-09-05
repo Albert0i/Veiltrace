@@ -160,6 +160,7 @@ router.get('/presearch', async (req, res) => {
         FROM imagetrace
         WHERE MATCH(description) AGAINST(? ${modifier})
       `, query);
+      
   // countResult = [ { count: 4n } ]
   const count = Number(countResult[0]?.count)
   res.status(count>0?200:204).json( { count } );
