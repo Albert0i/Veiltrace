@@ -39,7 +39,7 @@ router.get('/vista/:imageId', async (req, res) => {
   const imageId = parseInt(req.params.imageId);
   const result = await prisma.VistaTrace.findMany({
     where: { imageId },
-    select: { id: true, createdAt: true },
+    select: { id: true, type: true, createdAt: true },
     orderBy: {
       createdAt: 'desc'
       }

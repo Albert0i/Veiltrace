@@ -76,14 +76,14 @@ npm run dev
 
 #### II. 
 ```
-http://localhost:3000/info/:id - Get image information
-http://localhost:3000/vista/:id - Get image visited log
-http://localhost:3000/preview/:id - Image preview 
-http://localhost:3000/source/:id - Image source
-http://localhost:3000/type - Image types
-http://localhost:3000/search - Search image
-http://localhost:3000/presearch - Pre-search image 
-http://localhost:3000/status - System status 
+http://localhost:3000/api/v1/image/info/:id - Get image information
+http://localhost:3000/api/v1/image/vista/:id - Get image visited log
+http://localhost:3000/api/v1/image/preview/:id - Image preview 
+http://localhost:3000/api/v1/image/source/:id - Image source
+http://localhost:3000/api/v1/image/type - Image types
+http://localhost:3000/api/v1/image/search - Search image
+http://localhost:3000/api/v1/image/presearch - Pre-search image 
+http://localhost:3000/api/v1/image/status - System status 
 ```
 
 
