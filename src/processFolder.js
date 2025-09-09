@@ -14,7 +14,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 //import { processImage } from './utils.js'; // External async function
-import { processImage } from './processImage.js'; // External async function
+import { processImage } from './utils.js'; // External async function
 
 // Parse CLI argument or default to "img"
 const folderName = process.argv[2]?.trim() || 'img';
@@ -63,8 +63,10 @@ function isAsciiSafe(str) {
 function getSafePath(imagePath) {
   if (isAsciiSafe(imagePath)) return imagePath;
 
-  const tempPath = path.join(os.tmpdir(), 'veiltrace.jpg');
-  console.log(`📁 \tCopy ${imagePath} → ${tempPath}...`);
+  //const tempPath = "C:\\Users\\alber\\AppData\\Local\\Temp\\veiltrace.jpg"
+  const tempPath = path.join(os.tmpdir(), 'veiltrace.' + 
+                   path.extname(imagePath).slice(1));
+  console.log(`📁 \tCopy ${imagePath} → ${tempPath}`);
   fs.copyFileSync(imagePath, tempPath);
   return tempPath;
 }
@@ -138,7 +140,7 @@ async function main() {
       // Clean up temp file if used
       if (safePath !== imagePath && fs.existsSync(safePath)) {
         try {
-          console.log(`📁 \tRemove ${safePath}...`);
+          console.log(`📁 \tRemove ${safePath}`);
           fs.unlinkSync(safePath);
         } catch (e) {
           console.warn(`[WARN] Failed to delete temp file: ${safePath}`);

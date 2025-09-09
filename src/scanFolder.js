@@ -19,6 +19,7 @@ const DATA_FOLDER = path.resolve('./data');
 
 const userArgs = process.argv.slice(2);
 const rawPath = userArgs[0];
+const compareDate = userArgs[1] || "1900-01-01"; 
 const targetFolder = rawPath ? path.resolve(rawPath) : DEFAULT_FOLDER;
 const folderName = path.basename(targetFolder);
 const outputFile = path.join(DATA_FOLDER, `${folderName}.lst`);
@@ -40,7 +41,9 @@ function scanDirectory(dir) {
     if (entry.isDirectory()) {
       scanDirectory(fullPath);
     } else if (IMG_EXTENSIONS.test(entry.name)) {
-      imagePaths.push(fullPath);
+      const stats = fs.statSync(fullPath);
+      if (stats.birthtime.toISOString() >= compareDate)
+        imagePaths.push(fullPath);
     }
   }
 }
@@ -75,7 +78,7 @@ function main() {
     fs.mkdirSync(DATA_FOLDER);
   }
 
-  console.log(`🧭 Scanning folder: ${targetFolder}`);
+  console.log(`🧭 Scanning folder: ${targetFolder}, with creation date >= ${compareDate}`);
   scanDirectory(targetFolder);
   writeOutput();
 

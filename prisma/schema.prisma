@@ -39,11 +39,17 @@ model ImageTrace {
   @@fulltext([description], map: "fts_image_description")
 }
 
+enum TraceType {
+  view
+  export
+}
+
 model VistaTrace {
   id Int @id @default(autoincrement())
 
   image   ImageTrace @relation(fields: [imageId], references: [id], onDelete: Cascade)
   imageId Int
+  type    TraceType  @default(view)
 
   createdAt   String // ISO format: "2025-09-01T08:10:11.862Z"
   updateIdent Int    @default(0)

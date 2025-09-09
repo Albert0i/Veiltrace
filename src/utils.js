@@ -36,13 +36,14 @@ const PROMPT = 'Describe the image in detail, using approximately 300 words. Str
  * @returns {Promise<object>} - { imageName, fullPath, fileFormat, fileSizeKB, createdAt, description }
  */
 export async function processImage(imagePath) {
+  console.log(`🧭 Processing image: ${imagePath}`)
   return new Promise((resolve, reject) => {
     const imageName = path.basename(imagePath);
     // '--image', imagePath.replace(/\\/g, '/'),
     const args = [
       '-m', MODEL,
       '--mmproj', MMPROJ,
-      '--image', `"${imagePath.replace(/\\/g, '/')}"`,
+      '--image', imagePath.replace(/\\/g, '/'),
       '--prompt', PROMPT
     ];
 
@@ -135,6 +136,24 @@ export function splitDescription(description, breakReplacement = '\n\n') {
     .map(p => p.trim())
     .join(breakReplacement);
 
-  return { meta, content };
+  return { 
+    meta: formatMeta(meta), 
+    content 
+  };
 }
 
+function formatMeta(meta) {
+  const phrases = [
+    'encoding image slice',
+    'image slice encoded',
+    'decoding image batch',
+    'image decoded'
+  ];
+
+  for (const phrase of phrases) {
+    const regex = new RegExp(`(?!^)(${phrase})`, 'g');
+    meta = meta.replace(regex, '\n$1');
+  }
+
+  return meta;
+}
