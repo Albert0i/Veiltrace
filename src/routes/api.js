@@ -135,7 +135,7 @@ router.get('/search', async (req, res) => {
 
   const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
   const result = await prisma.$queryRawUnsafe(`
-        SELECT  id,
+        SELECT  id, visited, updatedAt, 
                 MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
         FROM imagetrace
         WHERE MATCH(description) AGAINST(? ${modifier})

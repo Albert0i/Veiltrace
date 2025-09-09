@@ -3,17 +3,15 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
-//import indexRouter from './routes/index.js';
+import indexRouter from './routes/index.js';
 import apiRouter from './routes/api.js';
-//import imgRoute from './routes/imgroute.js';
-//import mdRoute from './routes/mdroute.js';
-//import { redis } from './redis/redis.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
+app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -22,10 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use('/', indexRouter);
-// app.use('/', mdRoute);
+app.use('/', indexRouter);
 app.use('/api/v1/image', apiRouter);
-//app.use('/img', imgRoute);
 
 // Start server
 const HOST = process.env.HOST || 'localhost';
