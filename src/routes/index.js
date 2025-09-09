@@ -19,7 +19,7 @@ router.get('/', (req, res) => {
     mode: "natural", 
     expansion: false, 
     limit: 100, 
-    results: []
+    results: null
   });
 });
 
@@ -27,7 +27,7 @@ router.get('/', (req, res) => {
 router.post('/', async (req, res) => {
   const { query, mode, expansion, limit } = req.body;
 
-  //console.log('query =', query, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
+  console.log('query =', query, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
 
   const results = await fetchSearchResults(query, mode, expansion, limit )
   
@@ -68,9 +68,28 @@ async function fetchSearchResults(query, mode, expansion, limit) {
       throw new Error(`HTTP error: ${response.status}`);
     }
 
-    const data = await response.json();
-    //console.log('Search results:', data);
-    // Ritual continues: render or process the archive
+    if (!response.ok) {
+      const text = await response.text(); // safer fallback
+      throw new Error(`HTTP ${response.status}: ${text}`);
+    }
+  
+    const text = await response.text();
+    let data = []
+    
+    if (!text) {
+      //throw new Error('Empty response body');
+      console.log('Empty response body')
+      return data; 
+    }
+    
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      throw new Error('Invalid JSON: ' + err.message);
+    }    
+    // const data = await response.json();
+    // console.log('Search results:', data);
+    // // Ritual continues: render or process the archive
     return data
   } catch (error) {
     console.error('Search error:', error);

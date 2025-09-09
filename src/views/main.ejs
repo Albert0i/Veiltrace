@@ -69,9 +69,17 @@
     </form>
 
     <!-- Divider -->
-    <hr class="my-8 border-gray-300" />
+    <hr class="mt-4 mb-2 border-gray-300" />
 
     <!-- Search Results -->
+    <div id="matchCount" class="text-sm text-gray-900 mx-2 my-2">
+      <% if (results) { %> 
+        <%= results.length %> matched.
+      <% } else { %>
+        Enter search item...
+      <% } %>  
+    </div>
+
     <% if (results && results.length > 0) { %>
       <form id="exportForm" action="/export" method="POST">
 

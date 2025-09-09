@@ -131,7 +131,7 @@ router.get('/search', async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  //console.log('s =', query, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  console.log('s =', query, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
