@@ -39,9 +39,52 @@ Download the models from here:
 
 
 #### I. System Design 
+First of all , prepare image list by running: 
+```
+npm run scan 
+```
+
+By default, it scans all images in './img' folder. You can supply an folder name like so: 
+```
+npm run scan -- d:\photos
+```
+
+You can also specify files created on and after a specified date. 
+```
+npm run scan -- d:\photos 2025-09-10 
+```
+
+`scanFolder.js` creates image list '.lst' with the same name of scanned folder in "./data" folder. 
+
+Then, go ahead and process the image list by running: 
+```
+npm run process
+```
+
+By default, it processes "img.lst" saved in './data' folder. You can supply an another name like so: 
+```
+npm run process -- photos
+```
+
+`processFolder.js` creates JSONL file with the same name of input argument. It is a time-consuming process which may take hours or days depending on entries in image list. Besides ".lst" and ".jsonl" files, a '.sav' and '.fail.lst' is used to keep the current processing image and any images failed to process. 
+
+Next, to start the server with: 
+```
+npm run dev
+```
 
 
 #### II. 
+```
+http://localhost:3000/info/:id - Get image information
+http://localhost:3000/vista/:id - Get image visited log
+http://localhost:3000/preview/:id - Image preview 
+http://localhost:3000/source/:id - Image source
+http://localhost:3000/type - Image types
+http://localhost:3000/search - Search image
+http://localhost:3000/presearch - Pre-search image 
+http://localhost:3000/status - System status 
+```
 
 
 #### III. 
