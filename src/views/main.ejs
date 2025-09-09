@@ -38,7 +38,7 @@
       </div>
 
       <!-- Mode Selection, Query Expansion and Max. Return -->
-      <div class="flex flex-wrap items-center gap-6">
+      <div class="flex flex-wrap items-center gap-4">
         <label class="flex items-center space-x-2">
           <input type="radio" name="mode" id="modeNatural" value="natural" <%= mode === 'natural' ? 'checked' : '' %>>
           <span>Natural Language Mode</span>
@@ -74,13 +74,9 @@
     <!-- Search Results -->
     <% if (results && results.length > 0) { %>
       <form id="exportForm" action="/export" method="POST">
+
         <!-- Action Buttons -->
         <div class="flex items-center justify-start gap-4 mb-6">
-          <button type="submit"
-                  class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-            Export Selection
-          </button>
-
           <button type="button" id="selectAll"
                 class="px-4 py-2 bg-indigo-200 text-indigo-800 rounded hover:bg-indigo-300 transition">
             Select All
@@ -89,6 +85,16 @@
                 class="px-4 py-2 bg-indigo-200 text-indigo-800 rounded hover:bg-indigo-300 transition">
             Unselect All
           </button>
+          <button type="button" id="invertSelect"
+                class="px-4 py-2 bg-indigo-200 text-indigo-800 rounded hover:bg-indigo-300 transition">
+            Invert Select
+          </button>
+
+          <button type="submit"
+          class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+            Export Selection
+          </button>
+
         </div>
 
         <!-- Image Grid -->
@@ -138,6 +144,7 @@
     const exportForm = document.getElementById('exportForm');
     const selectAllBtn = document.getElementById('selectAll');
     const unselectAllBtn = document.getElementById('unselectAll');
+    const invertSelectBtn = document.getElementById('invertSelect');
 
     exportForm?.addEventListener('submit', function (e) {
       const checked = document.querySelectorAll('input[name="selected"]:checked');
@@ -153,6 +160,10 @@
 
     unselectAllBtn?.addEventListener('click', () => {
       document.querySelectorAll('input[name="selected"]').forEach(cb => cb.checked = false);
+    });
+
+    invertSelectBtn?.addEventListener('click', () => {
+      document.querySelectorAll('input[name="selected"]').forEach(cb => cb.checked = ! cb.checked);
     });
   </script>
 

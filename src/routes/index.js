@@ -8,6 +8,7 @@
  * └────────────────────────────────────────────────────────────┘
  */
 
+import 'dotenv/config';
 import express from 'express';
 const router = express.Router();
 
@@ -26,33 +27,17 @@ router.get('/', (req, res) => {
 router.post('/', async (req, res) => {
   const { query, mode, expansion, limit } = req.body;
 
-  console.log('query =', query, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
+  //console.log('query =', query, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
+
+  const results = await fetchSearchResults(query, mode, expansion, limit )
+  
   res.render('main', { 
     query,
     mode, 
     expansion, 
     limit, 
-    results: sample
+    results
   });
-  // let results = []
-  // try {
-  //   const response = await fetch('/api/v1/image/search', {
-  //     method: 'GET',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({ query, mode, expansion })
-  //   });
-
-  //   results = await response.json();
-  // } catch (err) {
-  //   console.error('Search error:', err);
-  // }
-
-  // res.render('main', { 
-  //   query,
-  //   mode, 
-  //   expansion, 
-  //   results
-  // });
 });
 
 // POST "/export" — Handle export action
@@ -63,6 +48,36 @@ router.post('/export', (req, res) => {
 });
 
 export default router;
+
+async function fetchSearchResults(query, mode, expansion, limit) {
+  const params = new URLSearchParams({
+    s: encodeURIComponent(query),
+    mode,
+    expansion: expansion ? true : false, 
+    limit
+  });
+
+  const HOST = process.env.HOST || 'localhost';
+  const PORT = process.env.PORT || 3000;
+  const url = `http://${HOST}:${PORT}/api/v1/image/search?${params.toString()}`;
+
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    //console.log('Search results:', data);
+    // Ritual continues: render or process the archive
+    return data
+  } catch (error) {
+    console.error('Search error:', error);
+    console.log('url =', url)
+    return null; 
+  }
+}
 
 const sample = [
   {
