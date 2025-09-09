@@ -17,34 +17,42 @@ router.get('/', (req, res) => {
     query: "",
     mode: "natural", 
     expansion: false, 
+    limit: 100, 
     results: []
   });
 });
 
 // POST "/" — Handle search form
 router.post('/', async (req, res) => {
-  const { query, mode, expansion } = req.body;
+  const { query, mode, expansion, limit } = req.body;
 
-  console.log('query =', query, ", mode =", mode, ", expansion =", expansion)
+  console.log('query =', query, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
   res.render('main', { 
     query,
     mode, 
     expansion, 
+    limit, 
     results: sample
   });
+  // let results = []
   // try {
   //   const response = await fetch('/api/v1/image/search', {
-  //     method: 'POST',
+  //     method: 'GET',
   //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({ query, mode, expand: !!expand })
+  //     body: JSON.stringify({ query, mode, expansion })
   //   });
 
-  //   const results = await response.json();
-  //   res.render('main', { results });
+  //   results = await response.json();
   // } catch (err) {
   //   console.error('Search error:', err);
-  //   res.render('main', { results: [], error: 'Search failed.' });
   // }
+
+  // res.render('main', { 
+  //   query,
+  //   mode, 
+  //   expansion, 
+  //   results
+  // });
 });
 
 // POST "/export" — Handle export action

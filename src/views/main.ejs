@@ -19,11 +19,25 @@
     </header>
 
     <!-- Search Form -->
-    <form action="/" method="POST" class="space-y-6 mt-6 px-2">
-      <input type="text" name="query" value="<%= query || '' %>" placeholder="Enter search query..." required
-             class="w-full px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300">
+    <form action="/" method="POST" class="space-y-4 mt-6 px-2">
 
-      <!-- Mode Selection with Query Expansion -->
+      <div class="flex items-center space-x-2">
+        <input type="text" name="query" id="queryInput" value="<%= query %>"
+               placeholder="Enter search term..."
+               class="flex-grow px-4 py-2 border rounded text-sm" />
+      
+        <a href="/info" target="_blank"
+           class="text-blue-600 hover:text-blue-800 transition"
+           title="Learn about search modes and rituals">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Mode Selection, Query Expansion and Max. Return -->
       <div class="flex flex-wrap items-center gap-6">
         <label class="flex items-center space-x-2">
           <input type="radio" name="mode" id="modeNatural" value="natural" <%= mode === 'natural' ? 'checked' : '' %>>
@@ -39,9 +53,13 @@
           <input type="radio" name="mode" id="modeBoolean" value="boolean" <%= mode === 'boolean' ? 'checked' : '' %>>
           <span>Boolean Mode</span>
         </label>
-      </div>
 
-      <!-- Search Button -->
+        <label class="flex items-center space-x-2 ml-6" for="maxReturns">Limit</label>
+        <input type="number" name="limit" id="maxReturns"
+               value="<%= limit %>" min="1" max="1000"
+               class="w-20 px-2 py-1 border rounded text-sm" />
+      </div>
+      
       <div class="flex space-x-4">
         <button type="submit"
                 class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
