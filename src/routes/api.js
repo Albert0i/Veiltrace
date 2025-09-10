@@ -21,7 +21,7 @@ const router = express.Router();
 // ─── GET /info/:id ────────────────────────────────────────────
 router.get('/info/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  const result = await prisma.imageTrace.findUnique({
+  const result = await prisma.imagetrace.findUnique({
     where: { id }, 
     select: { 
       imageName: true, fullPath: true,  fileFormat: true,  
@@ -37,7 +37,7 @@ router.get('/info/:id', async (req, res) => {
 // ─── GET /vista/:imageId ────────────────────────────────────────────
 router.get('/vista/:imageId', async (req, res) => {
   const imageId = parseInt(req.params.imageId);
-  const result = await prisma.VistaTrace.findMany({
+  const result = await prisma.vistatrace.findMany({
     where: { imageId },
     select: { id: true, type: true, createdAt: true },
     orderBy: {
@@ -51,7 +51,7 @@ router.get('/vista/:imageId', async (req, res) => {
 // ─── GET /preview/:id ─────────────────────────────────────────
 router.get('/preview/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  const result = await prisma.imageTrace.findUnique({
+  const result = await prisma.imagetrace.findUnique({
     where: { id }, 
     select: { 
       miniature: true
@@ -67,9 +67,9 @@ router.get('/preview/:id', async (req, res) => {
 });
 
 // ─── GET /source/:id ─────────────────────────────────────────
-router.get('/source/:id', async (req, res) => {
+router.get('/view/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  const result = await prisma.imageTrace.findUnique({
+  const result = await prisma.imagetrace.findUnique({
     where: { id }, 
     select: { 
       fullPath: true
@@ -87,7 +87,7 @@ router.get('/source/:id', async (req, res) => {
 
   // update imagetrace 
   const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-  const r1 = await prisma.imageTrace.update({
+  const r1 = await prisma.imagetrace.update({
     where: { id }, // or use another unique field like fullPath
     data: {
       visited: { increment: 1 },         // increment visit count
@@ -95,7 +95,7 @@ router.get('/source/:id', async (req, res) => {
     }
   });
   // update vistatrace 
-  const r2 = await prisma.vistaTrace.create({
+  const r2 = await prisma.vistatrace.create({
     data: {
       imageId: id,                        // ID of the image being accessed
       createdAt: updatedAt.toISOString()  // set to current timestamp
@@ -110,7 +110,7 @@ router.get('/source/:id', async (req, res) => {
 
 // ─── GET /types ───────────────────────────────────────────────
 router.get('/type', async (req, res) => {
-  const result = await prisma.imageTrace.groupBy({
+  const result = await prisma.imagetrace.groupBy({
     by: ['fileFormat'],
     _count: { fileFormat: true }
   });
@@ -132,9 +132,24 @@ router.get('/search', async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  console.log('text-scan >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
-  res.status(200).json(sample);
+  if (!query) return res.status(400).json({ error: 'Missing search query' });
+
+  const result = await prisma.imagetrace.findMany({
+    where: {
+      description: {
+        contains: query, // Case-insensitive if collation is set correctly
+      },
+      select: {
+        id: true, 
+        visited: true,
+        updatedAt: true
+      }
+    },
+  }); 
+
+  res.status(result.length>0?200:204).json(result);
 });
 
 // ─── GET /searchft?query=xxx&offset=10&limit=10&expansion=true──────────
@@ -146,7 +161,7 @@ router.get('/searchft', async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  console.log('full-text >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
@@ -172,7 +187,7 @@ router.get('/searchse', async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  console.log('semantic >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
   res.status(200).json(sample);
 });
