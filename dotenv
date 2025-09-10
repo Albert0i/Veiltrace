@@ -1,6 +1,6 @@
-
 HOST=localhost
-
 PORT=3000
+
+MODEL_NAME=bge-small-en-v1.5-f16.gguf
 
 DATABASE_URL="mysql://root:root@localhost:3306/veiltrace"

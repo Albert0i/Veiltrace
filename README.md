@@ -92,6 +92,9 @@ http://localhost:3000/api/v1/image/status - System status
 
 #### IV. 
 
+[bge-small-en-v1.5-gguf](https://huggingface.co/CompendiumLabs/bge-small-en-v1.5-gguf)
+
+
 
 #### V. Bibliography 
 1. [Redis AI challenge winners + Live vector search demo (with dev.to)](https://youtu.be/lBIdrGiDMok)
