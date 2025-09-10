@@ -93,7 +93,7 @@ http://localhost:3000/api/v1/image/status - System status
 #### IV. 
 
 [bge-small-en-v1.5-gguf](https://huggingface.co/CompendiumLabs/bge-small-en-v1.5-gguf)
-
+[Embedding-GGUF/nomic-embed-text-v1.5-GGUF](https://www.modelscope.cn/models/Embedding-GGUF/nomic-embed-text-v1.5-GGUF)
 
 
 #### V. Bibliography 

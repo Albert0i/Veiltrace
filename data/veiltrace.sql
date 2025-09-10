@@ -9,7 +9,7 @@ CREATE or replace TABLE imagetrace
   fileSize int(11) NOT NULL,
   meta text NOT NULL,
   description text NOT NULL,
-  embedding VECTOR(384) NOT NULL, 
+  embedding VECTOR(768) NOT NULL, 
   miniature longblob DEFAULT NULL,
   visited int(11) NOT NULL DEFAULT 0,
   updatedAt varchar(191) DEFAULT NULL,

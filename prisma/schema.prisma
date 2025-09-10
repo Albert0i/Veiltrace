@@ -16,7 +16,7 @@ model imagetrace {
   fileSize    Int
   meta        String                     @db.Text
   description String                     @db.Text
-  embedding   Unsupported("vector(384)")
+  embedding   Unsupported("vector(768)")
   miniature   Bytes?
   visited     Int                        @default(0)
   updatedAt   String?

@@ -16,7 +16,6 @@ import sharp from 'sharp';
 
 // node-llama-cpp 
 import {fileURLToPath} from "url";
-import path from "path";
 import {getLlama} from "node-llama-cpp";
 
 // node-llama-cpp 
@@ -25,7 +24,7 @@ const __dirname = path.dirname(
 );
 const llama = await getLlama();
 const model = await llama.loadModel({
-    modelPath: path.join(__dirname, "..", "src", "models", process.env.MODEL_NAME)
+    modelPath: path.join(__dirname, "..", "models", process.env.MODEL_NAME)
 });
 const context = await model.createEmbeddingContext();
 
@@ -58,6 +57,8 @@ async function seed() {
       //const indexedAt = new Date(Date.now());
       const indexedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
       const { meta, content } = splitDescription(record.description, '\n\n');
+
+      console.log('content.length =', content.length)
       const { vector } = await context.getEmbeddingFor(content);  
 
       const miniature = await sharp(record.fullPath)
@@ -68,7 +69,7 @@ async function seed() {
         await prisma.$executeRaw`
                 INSERT INTO imagetrace ( imageName, fullPath, fileFormat, fileSize, meta, 
                                          description, embedding, miniature, indexedAt, createdAt ) 
-                  VALUES( ${imageName}, ${fullPath}, ${fileFormat}, ${fileSize}, ${meta}, 
+                  VALUES( ${record.imageName}, ${record.fullPath}, ${record.fileFormat.toUpperCase()}, ${record.fileSizeKB}, ${meta}, 
                           ${content}, VEC_FromText(${JSON.stringify(vector)}), null, ${indexedAt}, ${createdAt} ) 
                   ON DUPLICATE KEY 
                   UPDATE updateIdent = updateIdent + 1;
