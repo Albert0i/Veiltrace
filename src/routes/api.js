@@ -15,6 +15,20 @@ import path from 'path';
 import fs from 'fs';
 import mime from 'mime';
 
+// node-llama-cpp 
+import {fileURLToPath} from "url";
+import {getLlama} from "node-llama-cpp";
+
+// node-llama-cpp 
+const __dirname = path.dirname(
+  fileURLToPath(import.meta.url)
+);
+const llama = await getLlama();
+const model = await llama.loadModel({
+    modelPath: path.join(__dirname, "..", "..", "models", process.env.MODEL_NAME)
+});
+const context = await model.createEmbeddingContext();
+
 const prisma = new PrismaClient();
 const router = express.Router();
 
@@ -140,13 +154,15 @@ router.get('/search', async (req, res) => {
     where: {
       description: {
         contains: query, // Case-insensitive if collation is set correctly
-      },
-      select: {
-        id: true, 
-        visited: true,
-        updatedAt: true
       }
     },
+    select: {
+      id: true, 
+      visited: true,
+      updatedAt: true
+    },
+    skip: offset, 
+    take: limit
   }); 
 
   res.status(result.length>0?200:204).json(result);
@@ -189,31 +205,25 @@ router.get('/searchse', async (req, res) => {
 
   console.log('semantic >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
-  res.status(200).json(sample);
+  if (!query) return res.status(400).json({ error: 'Missing search query' });
+
+  const { vector } = await context.getEmbeddingFor(query);
+
+  // Find similar documents 
+  const result = await prisma.$queryRaw`
+                        SELECT id, visited, updatedAt,
+                               VEC_DISTANCE_COSINE(
+                                  embedding,
+                                  VEC_FromText(${JSON.stringify(vector)})
+                                  ) AS distance, 
+                               id
+                        FROM imagetrace 
+                        ORDER BY 4 ASC
+                        LIMIT ${limit} OFFSET 0;
+                      `; 
+
+  res.status(result.length>0?200:204).json(result);
 });
-
-// // ─── GET /presearch?s=xxx─────────────────────────────────────────
-// router.get('/presearch', async (req, res) => {
-//   const query = req.query.query?.trim();
-//   const stype = req.query.stype
-//   const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
-//   const expansion = req.query.expansion === 'true'; // ← default is false
-
-//   console.log('s =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
-
-//   if (!query) return res.status(400).json({ error: 'Missing search query' });
-
-//   const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
-//   const countResult = await prisma.$queryRawUnsafe(`
-//         SELECT  count(*) as count
-//         FROM imagetrace
-//         WHERE MATCH(description) AGAINST(? ${modifier})
-//       `, query);
-      
-//   // countResult = [ { count: 4n } ]
-//   const count = Number(countResult[0]?.count)
-//   res.status(count>0?200:204).json( { count } );
-// });
 
 // ─── GET /status────────────────────────────────────────────────────
 router.get('/status', async (req, res) => {
