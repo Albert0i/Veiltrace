@@ -7,7 +7,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-  <div class="max-w-7xl mx-auto py-10 px-6">
+  <div class="max-w-7xl mx-auto pt-10 pb-2 px-6">
     <!-- Title & Subtitle -->
     <header class="mb-8 text-center">
       <h1 class="text-4xl font-bold tracking-wide">Veiltrace</h1>
@@ -29,7 +29,7 @@
           <div class="flex justify-end text-sm text-gray-600">
             <label class="flex items-center space-x-2">
               <span>Limit</span>
-              <input type="number" name="limit" value="100" min="1" max="1000"
+              <input type="number" name="limit" value="<%= limit %>" min="1" max="9999"
                     class="w-20 px-4 py-2 border rounded text-sm" />
             </label>
           </div>
