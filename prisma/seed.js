@@ -57,10 +57,8 @@ async function seed() {
       //const indexedAt = new Date(Date.now());
       const indexedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
       const { meta, content } = splitDescription(record.description, '\n\n');
-
-      console.log('content.length =', content.length)
+      
       const { vector } = await context.getEmbeddingFor(content);  
-
       const miniature = await sharp(record.fullPath)
         .resize(DEFAULT_MINIATURE, DEFAULT_MINIATURE, { fit: 'cover' })
         .jpeg({ quality: 80 })
@@ -70,7 +68,7 @@ async function seed() {
                 INSERT INTO imagetrace ( imageName, fullPath, fileFormat, fileSize, meta, 
                                          description, embedding, miniature, indexedAt, createdAt ) 
                   VALUES( ${record.imageName}, ${record.fullPath}, ${record.fileFormat.toUpperCase()}, ${record.fileSizeKB}, ${meta}, 
-                          ${content}, VEC_FromText(${JSON.stringify(vector)}), null, ${indexedAt}, ${createdAt} ) 
+                          ${content}, VEC_FromText(${JSON.stringify(vector)}), ${miniature}, ${indexedAt}, ${createdAt} ) 
                   ON DUPLICATE KEY 
                   UPDATE updateIdent = updateIdent + 1;
                 `;  
@@ -94,7 +92,7 @@ async function seed() {
       // });
 
       count++;
-      console.log(`✅ Upserted: ${record.imageName}`);
+      console.log(`✅ Upserted ${count}: ${record.imageName}`);
     } catch (err) {
       console.error(`❌ Failed on line ${count + 1}: ${err.message}`);
     }
