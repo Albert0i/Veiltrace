@@ -123,15 +123,30 @@ router.get('/type', async (req, res) => {
   res.json(formats);
 });
 
-// ─── GET /search?s=xxx&offset=10&limit=10&expansion=true──────────
+// ─── GET /search?query=xxx&offset=10&limit=10&expansion=true────────── 
 router.get('/search', async (req, res) => {
-  const query = req.query.s?.trim();
+  const query = req.query.query?.trim();
+  const stype = req.query.stype
   const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
   const offset = parseInt(req.query.offset) || 0;
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  console.log('s =', query, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+
+  res.status(200).json(sample);
+});
+
+// ─── GET /searchft?query=xxx&offset=10&limit=10&expansion=true──────────
+router.get('/searchft', async (req, res) => {
+  const query = req.query.query?.trim();
+  const stype = req.query.stype
+  const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
+  const offset = parseInt(req.query.offset) || 0;
+  const limit = parseInt(req.query.limit) || 20;
+  const expansion = req.query.expansion === 'true'; // ← default is false
+
+  console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
@@ -148,27 +163,44 @@ router.get('/search', async (req, res) => {
   res.status(result.length>0?200:204).json(result);
 });
 
-// ─── GET /presearch?s=xxx─────────────────────────────────────────
-router.get('/presearch', async (req, res) => {
-  const query = req.query.s?.trim();
+// ─── GET /searchse?query=xxx&offset=10&limit=10&expansion=true────────── 
+router.get('/searchse', async (req, res) => {
+  const query = req.query.query?.trim();
+  const stype = req.query.stype
   const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
+  const offset = parseInt(req.query.offset) || 0;
+  const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  if (!query) return res.status(400).json({ error: 'Missing search query' });
+  console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
-  const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
-  const countResult = await prisma.$queryRawUnsafe(`
-        SELECT  count(*) as count
-        FROM imagetrace
-        WHERE MATCH(description) AGAINST(? ${modifier})
-      `, query);
-      
-  // countResult = [ { count: 4n } ]
-  const count = Number(countResult[0]?.count)
-  res.status(count>0?200:204).json( { count } );
+  res.status(200).json(sample);
 });
 
-// ─── GET /presearch?s=xxx─────────────────────────────────────────
+// // ─── GET /presearch?s=xxx─────────────────────────────────────────
+// router.get('/presearch', async (req, res) => {
+//   const query = req.query.query?.trim();
+//   const stype = req.query.stype
+//   const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
+//   const expansion = req.query.expansion === 'true'; // ← default is false
+
+//   console.log('s =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+
+//   if (!query) return res.status(400).json({ error: 'Missing search query' });
+
+//   const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
+//   const countResult = await prisma.$queryRawUnsafe(`
+//         SELECT  count(*) as count
+//         FROM imagetrace
+//         WHERE MATCH(description) AGAINST(? ${modifier})
+//       `, query);
+      
+//   // countResult = [ { count: 4n } ]
+//   const count = Number(countResult[0]?.count)
+//   res.status(count>0?200:204).json( { count } );
+// });
+
+// ─── GET /status────────────────────────────────────────────────────
 router.get('/status', async (req, res) => {
   const [{ version }] = await prisma.$queryRaw`SELECT VERSION() AS version`;
   const numImages = await prisma.ImageTrace.count()
@@ -196,6 +228,33 @@ router.get('/status', async (req, res) => {
 });
 
 export default router;
+
+const sample = [
+  {
+    "id": 22,
+    "visited": 0,
+    "updatedAt": null,
+    "relevance": 4.93323230743408
+  },
+  {
+    "id": 20,
+    "visited": 0,
+    "updatedAt": null,
+    "relevance": 3.83695840835571
+  },
+  {
+    "id": 21,
+    "visited": 3,
+    "updatedAt": "2025-09-09T09:40:03.733Z",
+    "relevance": 2.74068450927734
+  },
+  {
+    "id": 19,
+    "visited": 0,
+    "updatedAt": null,
+    "relevance": 2.19254755973816
+  }
+]
 
 /*
    Full-Text Index Overview

@@ -16,6 +16,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
   res.render('main', { 
     query: "",
+    stype: "full-text", 
     mode: "natural", 
     expansion: false, 
     limit: 100, 
@@ -25,14 +26,15 @@ router.get('/', (req, res) => {
 
 // POST "/" — Handle search form
 router.post('/', async (req, res) => {
-  const { query, mode, expansion, limit } = req.body;
+  const { query, stype, mode, expansion, limit } = req.body;
 
-  console.log('query =', query, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
+  console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
 
-  const results = await fetchSearchResults(query, mode, expansion, limit )
+  const results = await fetchSearchResults(query, stype, mode, expansion, limit )
   
   res.render('main', { 
     query,
+    stype, 
     mode, 
     expansion, 
     limit, 
@@ -49,17 +51,27 @@ router.post('/export', (req, res) => {
 
 export default router;
 
-async function fetchSearchResults(query, mode, expansion, limit) {
+async function fetchSearchResults(query, stype, mode, expansion, limit) {
   const params = new URLSearchParams({
-    s: encodeURIComponent(query),
+    query: encodeURIComponent(query),
+    stype, 
     mode,
     expansion: expansion ? true : false, 
     limit
   });
-
+  switch(params.get('stype')) {
+    case "full-text":
+      stype = "ft"
+      break;
+    case "semantic":
+      stype = "se"
+      break;
+    default:
+      stype = ""
+  }
   const HOST = process.env.HOST || 'localhost';
   const PORT = process.env.PORT || 3000;
-  const url = `http://${HOST}:${PORT}/api/v1/image/search?${params.toString()}`;
+  const url = `http://${HOST}:${PORT}/api/v1/image/search${stype}?${params.toString()}`;
 
   try {
     const response = await fetch(url);
