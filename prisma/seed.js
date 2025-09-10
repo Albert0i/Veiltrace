@@ -13,6 +13,22 @@ import fs from 'fs';
 import readline from 'readline';
 import path from 'path';
 import sharp from 'sharp';
+
+// node-llama-cpp 
+import {fileURLToPath} from "url";
+import path from "path";
+import {getLlama} from "node-llama-cpp";
+
+// node-llama-cpp 
+const __dirname = path.dirname(
+  fileURLToPath(import.meta.url)
+);
+const llama = await getLlama();
+const model = await llama.loadModel({
+    modelPath: path.join(__dirname, "..", "src", "models", process.env.MODEL_NAME)
+});
+const context = await model.createEmbeddingContext();
+
 // Prisma 
 import { PrismaClient } from '../src/generated/prisma/index.js'; 
 import { splitDescription } from '../src/utils.js'
@@ -42,29 +58,39 @@ async function seed() {
       //const indexedAt = new Date(Date.now());
       const indexedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
       const { meta, content } = splitDescription(record.description, '\n\n');
+      const { vector } = await context.getEmbeddingFor(content);  
 
       const miniature = await sharp(record.fullPath)
         .resize(DEFAULT_MINIATURE, DEFAULT_MINIATURE, { fit: 'cover' })
         .jpeg({ quality: 80 })
         .toBuffer();
 
-      await prisma.imagetrace.upsert({
-        where: { fullPath: record.fullPath },
-        update: {
-          updateIdent: { increment: 1 },
-        },
-        create: {
-          imageName: record.imageName,
-          fullPath: record.fullPath,
-          fileFormat: record.fileFormat.toUpperCase(),
-          fileSize: record.fileSizeKB,
-          meta, 
-          description: content,
-          miniature,
-          indexedAt: indexedAt.toISOString(),
-          createdAt: createdAt.toISOString()
-        }
-      });
+        await prisma.$executeRaw`
+                INSERT INTO imagetrace ( imageName, fullPath, fileFormat, fileSize, meta, 
+                                         description, embedding, miniature, indexedAt, createdAt ) 
+                  VALUES( ${imageName}, ${fullPath}, ${fileFormat}, ${fileSize}, ${meta}, 
+                          ${content}, VEC_FromText(${JSON.stringify(vector)}), null, ${indexedAt}, ${createdAt} ) 
+                  ON DUPLICATE KEY 
+                  UPDATE updateIdent = updateIdent + 1;
+                `;  
+      // await prisma.imagetrace.upsert({
+      //   where: { fullPath: record.fullPath },
+      //   update: {
+      //     updateIdent: { increment: 1 },
+      //   },
+      //   create: {
+      //     imageName: record.imageName,
+      //     fullPath: record.fullPath,
+      //     fileFormat: record.fileFormat.toUpperCase(),
+      //     fileSize: record.fileSizeKB,
+      //     meta, 
+      //     description: content,
+
+      //     miniature,
+      //     indexedAt: indexedAt.toISOString(),
+      //     createdAt: createdAt.toISOString()
+      //   }
+      // });
 
       count++;
       console.log(`✅ Upserted: ${record.imageName}`);
@@ -81,3 +107,24 @@ async function seed() {
    main 
 */
 seed();
+
+/*
+      await prisma.imagetrace.upsert({
+        where: { fullPath: record.fullPath },
+        update: {
+          updateIdent: { increment: 1 },
+        },
+        create: {
+          imageName: record.imageName,
+          fullPath: record.fullPath,
+          fileFormat: record.fileFormat.toUpperCase(),
+          fileSize: record.fileSizeKB,
+          meta, 
+          description: content,
+          
+          miniature,
+          indexedAt: indexedAt.toISOString(),
+          createdAt: createdAt.toISOString()
+        }
+      });
+*/

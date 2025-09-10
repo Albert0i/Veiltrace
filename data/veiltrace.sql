@@ -9,6 +9,7 @@ CREATE or replace TABLE imagetrace
   fileSize int(11) NOT NULL,
   meta text NOT NULL,
   description text NOT NULL,
+  embedding VECTOR(384) NOT NULL, 
   miniature longblob DEFAULT NULL,
   visited int(11) NOT NULL DEFAULT 0,
   updatedAt varchar(191) DEFAULT NULL,
@@ -22,7 +23,9 @@ CREATE or replace TABLE imagetrace
   KEY idx_image_created (createdAt),
   KEY idx_image_visited (visited),
   FULLTEXT KEY fts_image_description (description)
-); 
+) ENGINE=InnoDB;; 
+
+CREATE OR REPLACE VECTOR INDEX idx_image_embedding ON imagetrace(embedding) M=16 DISTANCE=cosine; 
 
 -- veiltrace.vistatrace definition
 CREATE OR REPLACE TABLE vistatrace 
@@ -36,4 +39,4 @@ CREATE OR REPLACE TABLE vistatrace
   PRIMARY KEY (id),
   KEY idx_vista_image_ref (imageId),
   CONSTRAINT VistaTrace_imageId_fkey FOREIGN KEY (imageId) REFERENCES imagetrace (id) ON DELETE CASCADE ON UPDATE CASCADE
-); 
+) ENGINE=InnoDB;; 

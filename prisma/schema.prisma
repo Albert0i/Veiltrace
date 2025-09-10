@@ -9,24 +9,26 @@ datasource db {
 }
 
 model imagetrace {
-  id          Int          @id @default(autoincrement())
+  id          Int                        @id @default(autoincrement())
   imageName   String
-  fullPath    String       @unique(map: "uniq_image_fullpath")
+  fullPath    String                     @unique(map: "uniq_image_fullpath")
   fileFormat  String
   fileSize    Int
-  meta        String       @db.Text
-  description String       @db.Text
+  meta        String                     @db.Text
+  description String                     @db.Text
+  embedding   Unsupported("vector(384)")
   miniature   Bytes?
-  visited     Int          @default(0)
+  visited     Int                        @default(0)
   updatedAt   String?
   indexedAt   String
   createdAt   String
-  updateIdent Int          @default(0)
+  updateIdent Int                        @default(0)
   vistatrace  vistatrace[]
 
   @@index([createdAt], map: "idx_image_created")
   @@index([fileFormat], map: "idx_image_format")
   @@index([visited], map: "idx_image_visited")
+  @@index([embedding], map: "idx_image_embedding")
   @@fulltext([description], map: "fts_image_description")
 }
 
