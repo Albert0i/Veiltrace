@@ -1,14 +1,14 @@
 {
   "name": "veiltrace",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "src/app.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "chat": "bin\\llama-mtmd-cli.exe -m models\\gemma-3-4b-it-Q6_K.gguf --mmproj models\\mmproj-gemma-3-4b-it-f16.gguf",
     "scan": "node src/scanFolder.js",
     "process": "node src/processFolder.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/app.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
