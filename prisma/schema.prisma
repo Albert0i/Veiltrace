@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -14,45 +8,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ImageTrace {
-  id          Int    @id @default(autoincrement())
+model imagetrace {
+  id          Int          @id @default(autoincrement())
   imageName   String
-  fullPath    String
+  fullPath    String       @unique(map: "uniq_image_fullpath")
   fileFormat  String
   fileSize    Int
-  meta        String @db.Text // Optional metadata, tags, or symbolic notes
-  description String @db.Text // Symbolic summary or generated trace
-  miniature   Bytes? // 256×256 thumbnail stored as binary
+  meta        String       @db.Text
+  description String       @db.Text
+  miniature   Bytes?
+  visited     Int          @default(0)
+  updatedAt   String?
+  indexedAt   String
+  createdAt   String
+  updateIdent Int          @default(0)
+  vistatrace  vistatrace[]
 
-  visited     Int     @default(0)
-  updatedAt   String? // ISO format: "2025-09-01T08:10:11.862Z"
-  indexedAt   String // ISO format: "2025-09-01T08:10:11.862Z"
-  createdAt   String // ISO format: "2025-09-01T08:10:11.862Z"
-  updateIdent Int     @default(0)
-
-  vistas VistaTrace[] // ← One-to-many relationship
-
-  @@unique([fullPath], map: "uniq_image_fullpath")
-  @@index([fileFormat], map: "idx_image_format")
   @@index([createdAt], map: "idx_image_created")
+  @@index([fileFormat], map: "idx_image_format")
   @@index([visited], map: "idx_image_visited")
   @@fulltext([description], map: "fts_image_description")
 }
 
-enum TraceType {
-  view
-  export
-}
-
-model VistaTrace {
-  id Int @id @default(autoincrement())
-
-  image   ImageTrace @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  imageId Int
-  type    TraceType  @default(view)
-
-  createdAt   String // ISO format: "2025-09-01T08:10:11.862Z"
-  updateIdent Int    @default(0)
+model vistatrace {
+  id          Int             @id @default(autoincrement())
+  imageId     Int
+  type        vistatrace_type @default(view)
+  createdAt   String
+  updateIdent Int             @default(0)
+  imagetrace  imagetrace      @relation(fields: [imageId], references: [id], onDelete: Cascade, map: "VistaTrace_imageId_fkey")
 
   @@index([imageId], map: "idx_vista_image_ref")
+}
+
+enum vistatrace_type {
+  view
+  export
 }

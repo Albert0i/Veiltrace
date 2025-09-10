@@ -48,7 +48,7 @@ async function seed() {
         .jpeg({ quality: 80 })
         .toBuffer();
 
-      await prisma.imageTrace.upsert({
+      await prisma.imagetrace.upsert({
         where: { fullPath: record.fullPath },
         update: {
           updateIdent: { increment: 1 },
