@@ -42,6 +42,12 @@ router.post('/', async (req, res) => {
   });
 });
 
+// Route to render view page
+router.get('/view/:id', (req, res) => {
+  const id = req.params.id;
+  res.render('view', {id, ...sample2 });
+});
+
 // POST "/export" — Handle export action
 router.post('/export', (req, res) => {
   const { selected } = req.body;
@@ -108,6 +114,37 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
     console.log('url =', url)
     return null; 
   }
+}
+
+const sample2 = {
+    "imageName": "539429830_767705962525439_1268665176191374100_n.jpg",
+    "fullPath": "D:/RU/Veiltrace/img/chin/539429830_767705962525439_1268665176191374100_n.jpg",
+    "fileFormat": "JPG",
+    "fileSize": 190,
+    "meta": "...",
+    "description": "...",
+    "visited": 0,
+    "updatedAt": null,
+    "indexedAt": "2025-09-11 09:22:08.865000",
+    "createdAt": "2025-09-01 08:10:12.554000",
+    "updateIdent": 0,
+    "vistas": [
+    {
+      "id": 3,
+      "type": "view",
+      "createdAt": "2025-09-11T10:55:18.469Z"
+    },
+    {
+      "id": 2,
+      "type": "view",
+      "createdAt": "2025-09-11T10:55:17.957Z"
+    },
+    {
+      "id": 1,
+      "type": "view",
+      "createdAt": "2025-09-11T10:55:16.285Z"
+    }
+  ] 
 }
 
 const sample = [
