@@ -48,12 +48,16 @@
         <section class="bg-white rounded-lg shadow p-2 space-y-1 text-sm">
           <h2 class="text-lg font-semibold text-black mb-2">Vista Details</h2>
 
-          <ol class="list-decimal list-inside space-y-1 text-sm text-gray-900">
-            <% vistas.forEach(vista => { %>
-              <li><%= vista.type.charAt(0).toUpperCase() + vista.type.slice(1)
-                %> — <%= vista.createdAt %></li>
+          <ul class="list-none space-y-1 text-sm text-gray-900">
+            <% vistas.forEach((vista, index) => { %>
+              <li>
+                <strong>
+                  <%= vistas.length - index %>
+                </strong> . 
+                <%= vista.type.charAt(0).toUpperCase() + vista.type.slice(1) %> — <%= vista.createdAt %>
+              </li>
             <% }) %>
-          </ol>
+          </ul>
         </section>
   
       </main>
