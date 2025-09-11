@@ -28,7 +28,7 @@ router.get('/', (req, res) => {
 router.post('/', async (req, res) => {
   const { query, stype, mode, expansion, limit } = req.body;
 
-  console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
+  //console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
 
   const results = await fetchSearchResults(query, stype, mode, expansion, limit )
   

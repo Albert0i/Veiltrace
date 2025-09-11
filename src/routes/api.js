@@ -146,7 +146,7 @@ router.get('/search', async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  console.log('text-scan >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  //console.log('text-scan >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
@@ -177,7 +177,7 @@ router.get('/searchft', async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  console.log('full-text >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  //console.log('full-text >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
@@ -203,7 +203,7 @@ router.get('/searchse', async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  console.log('semantic >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  //console.log('semantic >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ error: 'Missing search query' });
 
@@ -228,8 +228,8 @@ router.get('/searchse', async (req, res) => {
 // ─── GET /status────────────────────────────────────────────────────
 router.get('/status', async (req, res) => {
   const [{ version }] = await prisma.$queryRaw`SELECT VERSION() AS version`;
-  const numImages = await prisma.ImageTrace.count()
-  const numVistas = await prisma.VistaTrace.count()
+  const numImages = await prisma.imagetrace.count()
+  const numVistas = await prisma.vistatrace.count()
   const [{ _, size }] = await await prisma.$queryRaw`
                             SELECT table_name AS 'table',
                                     ROUND((data_length + index_length) / 1024 / 1024, 2) AS 'size'
@@ -237,7 +237,7 @@ router.get('/status', async (req, res) => {
                             WHERE table_schema = 'veiltrace' AND 
                                   table_name in ('imagetrace', 'vistatrace');
                             `;
-  const visited = await prisma.ImageTrace.count({ 
+  const visited = await prisma.imagetrace.count({ 
     where: {
       visited: { gt: 0 }
     }
