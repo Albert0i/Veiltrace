@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 import indexRouter from './routes/index.js';
 import apiRouter from './routes/api.js';
+import { cleanupTempFolders } from './utils.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +24,9 @@ app.use(cookieParser());
 
 app.use('/', indexRouter);
 app.use('/api/v1/image', apiRouter);
+
+// 🌿 Ritual sweep before the archive awakens
+await cleanupTempFolders();
 
 // Start server
 const HOST = process.env.HOST || 'localhost';

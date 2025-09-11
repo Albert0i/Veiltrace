@@ -11,6 +11,10 @@
 import 'dotenv/config';
 import express from 'express';
 const router = express.Router();
+import { promises as fs } from 'fs';
+import path from 'path';
+import os from 'os';
+import archiver from 'archiver';
 
 // GET "/" — Main search page
 router.get('/', async (req, res) => {
@@ -131,10 +135,60 @@ router.get('/info', async (req, res) => {
 });
 
 // POST "/export" — Handle export action
+// router.post('/export', async (req, res) => {
+//   const { selected } = req.body;
+//   // Placeholder: await your instructions
+//   res.send(`Exporting images: ${selected}`);
+// });
 router.post('/export', async (req, res) => {
+  //const ids = req.body.ids; // e.g. [7, 4, 16]
   const { selected } = req.body;
-  // Placeholder: await your instructions
-  res.send(`Exporting images: ${selected}`);
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'veiltrace-'));
+  const HOST = process.env.HOST || 'localhost';
+  const PORT = process.env.PORT || 3000;
+
+  try {
+    const filePaths = [];
+
+    for (const id of selected) {
+      const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/info/${id}`);
+      if (!response.ok) throw new Error(`Failed to fetch metadata for ID ${id}`);
+      const data = await response.json();
+
+      const sourcePath = data.fullPath;
+      const filename = path.basename(sourcePath);
+      const destPath = path.join(tempDir, filename);
+
+      await fs.copyFile(sourcePath, destPath);
+      filePaths.push({ path: destPath, name: filename });
+    }
+
+    const zipName = `veiltrace_export_${Date.now()}.zip`;
+    const zipPath = path.join(tempDir, zipName);
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    const output = await fs.open(zipPath, 'w');
+    const stream = output.createWriteStream();
+
+    archive.pipe(stream);
+    filePaths.forEach(file => {
+      //archive.file(file.path, { name: file.name });
+      archive.file(file.path, { name: `veiltrace/${file.name}` });
+    });
+
+    await archive.finalize();
+
+    stream.on('close', async () => {
+      res.download(zipPath, zipName, async () => {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      });
+    });
+
+  } catch (err) {
+    console.error('Export error:', err);
+    await fs.rm(tempDir, { recursive: true, force: true });
+    res.status(500).send('Export failed.');
+  }
 });
 
 export default router;

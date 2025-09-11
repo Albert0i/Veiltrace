@@ -16,6 +16,8 @@
 import fs from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';
+import { readdir, rm } from 'fs/promises';
+import os from 'os';
 
 // Define paths and prompt
 const ROOT = path.resolve('.');
@@ -156,4 +158,24 @@ function formatMeta(meta) {
   }
 
   return meta;
+}
+
+const TEMP_PREFIX = 'veiltrace-';
+
+export async function cleanupTempFolders() {
+  const tempRoot = os.tmpdir();
+  const entries = await readdir(tempRoot, { withFileTypes: true });
+
+  const targets = entries
+    .filter(entry => entry.isDirectory() && entry.name.startsWith(TEMP_PREFIX))
+    .map(entry => path.join(tempRoot, entry.name));
+
+  for (const dir of targets) {
+    try {
+      await rm(dir, { recursive: true, force: true });
+      console.log(`🧹 Cleaned up lingering temp folder: ${dir}`);
+    } catch (err) {
+      console.warn(`⚠️ Failed to remove ${dir}: ${err.message}`);
+    }
+  }
 }
