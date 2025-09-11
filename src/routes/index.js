@@ -45,30 +45,84 @@ router.post('/', async (req, res) => {
 // Route to render view page
 router.get('/view/:id', async (req, res) => {
   const id = req.params.id;
-  console.log('id =', id)
+  //console.log('id =', id)
 
   const HOST = process.env.HOST || 'localhost';
   const PORT = process.env.PORT || 3000;
+  let data = []
+  let vistas = []
+
+  // ImageTrace 
   const url1 = `http://${HOST}:${PORT}/api/v1/image/info/${id}`;
 
-  const response1 = await fetch(url1);
-  if (!response1.ok) {
-    throw new Error(`HTTP error: ${response1.status}`);
-  }
-  const result = JSON.parse(await response1.text());
-  //console.log('result =', result)
+  try {
+    const response = await fetch(url1);
 
-  const url2 = `http://${HOST}:${PORT}/api/v1/image/vista/${id}`;
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    if (!response.ok) {
+      const text = await response.text(); // safer fallback
+      throw new Error(`HTTP ${response.status}: ${text}`);
+    }
   
-  const response2 = await fetch(url2);
-  if (!response2.ok) {
-    throw new Error(`HTTP error: ${response2.status}`);
+    const text = await response.text();
+        
+    if (!text) {
+      //throw new Error('Empty response body');
+      console.log('Empty response body')
+    }
+    
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      throw new Error('Invalid JSON: ' + err.message);
+    }    
+    // const data = await response.json();
+    // console.log('Search results:', data);
+    // // Ritual continues: render or process the archive
+  } catch (error) {
+    console.error('Search error:', error);
+    console.log('url1 =', url1)
   }
-  const vistas = JSON.parse(await response2.text());
-  console.log('vistas =', vistas)
+  // VistaTrace 
+  const url2 = `http://${HOST}:${PORT}/api/v1/image/vista/${id}`;
+
+  try {
+    const response = await fetch(url2);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    if (!response.ok) {
+      const text = await response.text(); // safer fallback
+      throw new Error(`HTTP ${response.status}: ${text}`);
+    }
+  
+    const text = await response.text();
+        
+    if (!text) {
+      //throw new Error('Empty response body');
+      console.log('Empty response body')
+    }
+    
+    try {
+      vistas = JSON.parse(text);
+    } catch (err) {
+      throw new Error('Invalid JSON: ' + err.message);
+    }    
+    // const data = await response.json();
+    // console.log('Search results:', data);
+    // // Ritual continues: render or process the archive
+  } catch (error) {
+    console.error('Search error:', error);
+    console.log('url2 =', url2)
+  }  
 
   //res.render('view', {id, ...sample2 });
-  res.render('view', {id, ...result, vistas });
+  res.render('view', {id, ...data, vistas });
 });
 
 // Route to render info page

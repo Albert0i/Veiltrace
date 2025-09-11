@@ -24,7 +24,7 @@
         </section>
   
         <!-- Metadata -->
-        <section class="bg-white rounded-lg shadow p-2 space-y-1 text-sm">
+        <section class="bg-white rounded-lg shadow p-2 space-y-1 text-md">
           <h2 class="text-lg font-semibold text-black mb-2">Image Details</h2>
 
           <div><span class="font-medium text-gray-900">Name:</span> <%= imageName %></div>
@@ -32,8 +32,10 @@
           <div><span class="font-medium text-gray-900">Size:</span> <%= fileSize %> KB</div>
           <div><span class="font-medium text-gray-900">Path:</span> <%= fullPath %></div>
 
-          <div><span class="font-medium text-gray-900">Meta:</span> <%- meta %></div>
-          <div><span class="font-medium text-gray-900">Description:</span> <%- description %></div>
+          <div><span class="font-medium text-gray-900">Meta:</span> <br /><%- meta.replace(/\n/g, "<br />")
+            %></div>
+          <div><span class="font-medium text-gray-900">Description:</span> <br /><%- description.replace(/\n/g, "<br />")
+            %></div>
 
           <div><span class="font-medium text-gray-900">Visited:</span> <%= visited %></div>
           <div><span class="font-medium text-gray-900">Updated At:</span> <%= updatedAt || '—' %></div>
@@ -46,9 +48,10 @@
         <section class="bg-white rounded-lg shadow p-2 space-y-1 text-sm">
           <h2 class="text-lg font-semibold text-black mb-2">Vista Details</h2>
 
-          <ol class="space-y-1 text-sm text-gray-600">
+          <ol class="list-decimal list-inside space-y-1 text-sm text-gray-900">
             <% vistas.forEach(vista => { %>
-              <li>🜂 View #<%= vista.id %> — <%= vista.createdAt %></li>
+              <li><%= vista.type.charAt(0).toUpperCase() + vista.type.slice(1)
+                %> — <%= vista.createdAt %></li>
             <% }) %>
           </ol>
         </section>
