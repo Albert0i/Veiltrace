@@ -38,7 +38,7 @@ Download the models from here:
 - [mmproj-google_gemma-3-4b-it-f16.gguf](https://huggingface.co/bartowski/google_gemma-3-4b-it-GGUF/blob/main/mmproj-google_gemma-3-4b-it-f16.gguf)
 
 
-#### I. System Design 
+#### I. System Setup 
 First of all , prepare image list by running: 
 ```
 npm run scan 
@@ -68,6 +68,73 @@ npm run process -- photos
 
 `processFolder.js` creates JSONL file with the same name of input argument. It is a time-consuming process which may take hours or days depending on entries in image list. Besides ".lst" and ".jsonl" files, a '.sav' and '.fail.lst' is used to keep the current processing image and any images failed to process. 
 
+Create two tables in MariaDB:
+`imagetrace`
+```
+-- veiltrace.imagetrace definition
+CREATE or replace TABLE imagetrace 
+(
+  id int(11) NOT NULL AUTO_INCREMENT,
+  imageName varchar(191) NOT NULL,
+  fullPath varchar(191) NOT NULL,
+  fileFormat varchar(191) NOT NULL,
+  fileSize int(11) NOT NULL,
+  meta text NOT NULL,
+  description text NOT NULL,
+  embedding VECTOR(768) NOT NULL, 
+  miniature longblob DEFAULT NULL,
+  visited int(11) NOT NULL DEFAULT 0,
+  updatedAt varchar(191) DEFAULT NULL,
+  indexedAt varchar(191) NOT NULL,
+  createdAt varchar(191) NOT NULL,
+  updateIdent int(11) NOT NULL DEFAULT 0,
+  
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_image_fullpath (fullPath),
+  KEY idx_image_format (fileFormat),
+  KEY idx_image_created (createdAt),
+  KEY idx_image_visited (visited),
+  FULLTEXT KEY fts_image_description (description)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE OR REPLACE VECTOR INDEX idx_image_embedding ON imagetrace(embedding) M=16 DISTANCE=cosine; 
+```
+
+`vistatrace`
+```
+-- veiltrace.vistatrace definition
+CREATE OR REPLACE TABLE vistatrace 
+(
+  id int(11) NOT NULL AUTO_INCREMENT,
+  imageId int(11) NOT NULL,
+  type enum('view','export') NOT NULL DEFAULT 'view',
+  createdAt  varchar(191) NOT NULL,
+  updateIdent int(11) NOT NULL DEFAULT 0,
+  
+  PRIMARY KEY (id),
+  KEY idx_vista_image_ref (imageId),
+  CONSTRAINT VistaTrace_imageId_fkey FOREIGN KEY (imageId) REFERENCES imagetrace (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+Generate database schema by inspecting database with: 
+```
+npx prisma db pull 
+```
+
+Generate prisma client code with: 
+```
+npx prisma generate 
+```
+
+- [bge-small-en-v1.5-gguf](https://huggingface.co/CompendiumLabs/bge-small-en-v1.5-gguf) 384 dimensions;  
+- [Embedding-GGUF/nomic-embed-text-v1.5-GGUF](https://www.modelscope.cn/models/Embedding-GGUF/nomic-embed-text-v1.5-GGUF) 768 dimensions for long text.
+
+Seed database with: 
+```
+npx prisma db seed
+```
+
 Next, to start the server with: 
 ```
 npm run dev
@@ -79,10 +146,11 @@ npm run dev
 http://localhost:3000/api/v1/image/info/:id - Get image information
 http://localhost:3000/api/v1/image/vista/:id - Get image visited log
 http://localhost:3000/api/v1/image/preview/:id - Image preview 
-http://localhost:3000/api/v1/image/source/:id - Image source
+http://localhost:3000/api/v1/image/view/:id - Image source
 http://localhost:3000/api/v1/image/type - Image types
-http://localhost:3000/api/v1/image/search - Search image
-http://localhost:3000/api/v1/image/presearch - Pre-search image 
+http://localhost:3000/api/v1/image/search - Text scan earch
+http://localhost:3000/api/v1/image/searchft - Full text search
+http://localhost:3000/api/v1/image/searchse - Semantic search
 http://localhost:3000/api/v1/image/status - System status 
 ```
 
@@ -92,8 +160,7 @@ http://localhost:3000/api/v1/image/status - System status
 
 #### IV. 
 
-[bge-small-en-v1.5-gguf](https://huggingface.co/CompendiumLabs/bge-small-en-v1.5-gguf)
-[Embedding-GGUF/nomic-embed-text-v1.5-GGUF](https://www.modelscope.cn/models/Embedding-GGUF/nomic-embed-text-v1.5-GGUF)
+
 
 
 #### V. Bibliography 
