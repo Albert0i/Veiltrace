@@ -31,12 +31,15 @@
           <div><span class="font-medium text-gray-900">Format:</span> <%= fileFormat %></div>
           <div><span class="font-medium text-gray-900">Size:</span> <%= fileSize %> KB</div>
           <div><span class="font-medium text-gray-900">Path:</span> <%= fullPath %></div>
-          <div><span class="font-medium text-gray-900">Description:</span> <%= description %></div>
-          <div><span class="font-medium text-gray-900">Meta:</span> <%= meta %></div>
+
+          <div><span class="font-medium text-gray-900">Meta:</span> <%- meta %></div>
+          <div><span class="font-medium text-gray-900">Description:</span> <%- description %></div>
+
           <div><span class="font-medium text-gray-900">Visited:</span> <%= visited %></div>
-          <div><span class="font-medium text-gray-900">Created At:</span> <%= createdAt %></div>
-          <div><span class="font-medium text-gray-900">Indexed At:</span> <%= indexedAt %></div>
           <div><span class="font-medium text-gray-900">Updated At:</span> <%= updatedAt || '—' %></div>
+          <div><span class="font-medium text-gray-900">Indexed At:</span> <%= indexedAt %></div>
+          <div><span class="font-medium text-gray-900">Created At:</span> <%= createdAt %></div>
+
         </section>
   
         <!-- Vistas -->

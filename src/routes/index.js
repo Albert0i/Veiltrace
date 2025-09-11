@@ -13,7 +13,7 @@ import express from 'express';
 const router = express.Router();
 
 // GET "/" — Main search page
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   res.render('main', { 
     query: "",
     stype: "full-text", 
@@ -43,19 +43,41 @@ router.post('/', async (req, res) => {
 });
 
 // Route to render view page
-router.get('/view/:id', (req, res) => {
+router.get('/view/:id', async (req, res) => {
   const id = req.params.id;
   console.log('id =', id)
-  res.render('view', {id, ...sample2 });
+
+  const HOST = process.env.HOST || 'localhost';
+  const PORT = process.env.PORT || 3000;
+  const url1 = `http://${HOST}:${PORT}/api/v1/image/info/${id}`;
+
+  const response1 = await fetch(url1);
+  if (!response1.ok) {
+    throw new Error(`HTTP error: ${response1.status}`);
+  }
+  const result = JSON.parse(await response1.text());
+  //console.log('result =', result)
+
+  const url2 = `http://${HOST}:${PORT}/api/v1/image/vista/${id}`;
+  
+  const response2 = await fetch(url2);
+  if (!response2.ok) {
+    throw new Error(`HTTP error: ${response2.status}`);
+  }
+  const vistas = JSON.parse(await response2.text());
+  console.log('vistas =', vistas)
+
+  //res.render('view', {id, ...sample2 });
+  res.render('view', {id, ...result, vistas });
 });
 
 // Route to render info page
-router.get('/info', (req, res) => {
+router.get('/info', async (req, res) => {
   res.render('info', {  });
 });
 
 // POST "/export" — Handle export action
-router.post('/export', (req, res) => {
+router.post('/export', async (req, res) => {
   const { selected } = req.body;
   // Placeholder: await your instructions
   res.send(`Exporting images: ${selected}`);
