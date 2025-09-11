@@ -10,14 +10,15 @@
 
 import 'dotenv/config';
 import express from 'express';
-const router = express.Router();
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import archiver from 'archiver';
 // Prisma 
 import { PrismaClient } from '../../src/generated/prisma/index.js'; 
+
 const prisma = new PrismaClient();
+const router = express.Router();
 
 // GET "/" — Main search page
 router.get('/', async (req, res) => {
@@ -165,7 +166,7 @@ router.post('/export', async (req, res) => {
       await fs.copyFile(sourcePath, destPath);
       filePaths.push({ path: destPath, name: filename });
 
-        // update imagetrace 
+      // update imagetrace 
       const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
       const r1 = await prisma.imagetrace.update({
         where: { id: Number(id) }, // or use another unique field like fullPath
