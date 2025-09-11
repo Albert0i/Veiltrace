@@ -26,9 +26,9 @@ model imagetrace {
   vistatrace  vistatrace[]
 
   @@index([createdAt], map: "idx_image_created")
+  @@index([embedding], map: "idx_image_embedding")
   @@index([fileFormat], map: "idx_image_format")
   @@index([visited], map: "idx_image_visited")
-  @@index([embedding], map: "idx_image_embedding")
   @@fulltext([description], map: "fts_image_description")
 }
 

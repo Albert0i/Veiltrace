@@ -33,7 +33,7 @@ import { PrismaClient } from '../src/generated/prisma/index.js';
 import { splitDescription } from '../src/utils.js'
 
 const DEFAULT_JSNOL = './data/img.jsonl'  // Default jsonl to seed 
-const DEFAULT_MINIATURE = 128             // Size of miniature
+const DEFAULT_MINIATURE = 256             // Size of miniature
 
 const prisma = new PrismaClient();
 const jsonlPath = path.resolve(process.argv[2] || DEFAULT_JSNOL);

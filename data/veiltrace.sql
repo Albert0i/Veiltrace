@@ -23,7 +23,7 @@ CREATE or replace TABLE imagetrace
   KEY idx_image_created (createdAt),
   KEY idx_image_visited (visited),
   FULLTEXT KEY fts_image_description (description)
-) ENGINE=InnoDB;; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE OR REPLACE VECTOR INDEX idx_image_embedding ON imagetrace(embedding) M=16 DISTANCE=cosine; 
 
@@ -39,4 +39,4 @@ CREATE OR REPLACE TABLE vistatrace
   PRIMARY KEY (id),
   KEY idx_vista_image_ref (imageId),
   CONSTRAINT VistaTrace_imageId_fkey FOREIGN KEY (imageId) REFERENCES imagetrace (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
