@@ -45,7 +45,13 @@ router.post('/', async (req, res) => {
 // Route to render view page
 router.get('/view/:id', (req, res) => {
   const id = req.params.id;
+  console.log('id =', id)
   res.render('view', {id, ...sample2 });
+});
+
+// Route to render info page
+router.get('/info', (req, res) => {
+  res.render('info', {  });
 });
 
 // POST "/export" — Handle export action
