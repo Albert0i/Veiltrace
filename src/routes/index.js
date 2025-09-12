@@ -135,18 +135,24 @@ router.get('/view/:id', async (req, res) => {
 
 // Route to render info page
 router.get('/info', async (req, res) => {
-  res.render('info', {
-    version: "11.7.2-MariaDB",
-    numImages: 42,
-    numVistas: 10,
-    size: "1.59",
-    visited: 1,
-    type: [
-      { fileFormat: "JPEG", count: 3 },
-      { fileFormat: "JPG", count: 39 }
-    ],
-    randomId: 21
-  });
+  const info = await fetchSystemInfo()
+  // res.render('info', {
+  //   version: "11.7.2-MariaDB",
+  //   numImages: 42,
+  //   numVistas: 10,
+  //   size: "1.59",
+  //   visited: 1,
+  //   type: [
+  //     { fileFormat: "JPEG", count: 3 },
+  //     { fileFormat: "JPG", count: 39 }
+  //   ],
+  //   randomId: 21
+  // });
+  //console.log(info.type)
+  const total = info.type.reduce((sum, item) => sum + item.count, 0);
+  const randomId = Math.floor(Math.random() * total) + 1;
+  //console.log('info =', {...info, randomId})
+  res.render('info', {...info, randomId})
 });
 
 // POST "/export" — Handle export action
@@ -301,6 +307,67 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
   } catch (error) {
     console.error('Search error:', error);
     console.log('url =', url)
+    return null; 
+  }
+}
+
+async function fetchSystemInfo() {
+  const HOST = process.env.HOST || 'localhost';
+  const PORT = process.env.PORT || 3000;
+  const url1 = `http://${HOST}:${PORT}/api/v1/image/status`;
+  const url2 = `http://${HOST}:${PORT}/api/v1/image/type`;
+
+  try {
+    const response1 = await fetch(url1);
+    const response2 = await fetch(url2);
+
+    if (!response1.ok) {
+      throw new Error(`HTTP error: ${response1.status}`);
+    }
+    if (!response2.ok) {
+      throw new Error(`HTTP error: ${response2.status}`);
+    }
+
+    if (!response1.ok) {
+      const text = await response1.text(); // safer fallback
+      throw new Error(`HTTP ${response1.status}: ${text}`);
+    }
+    if (!response2.ok) {
+      const text = await response2.text(); // safer fallback
+      throw new Error(`HTTP ${response2.status}: ${text}`);
+    }
+
+    const text1 = await response1.text();
+    const text2 = await response2.text();
+
+    let data = []
+    
+    if (!text1) {
+      //throw new Error('Empty response body');
+      console.log('Empty response body')
+      return data; 
+    }
+    if (!text2) {
+      //throw new Error('Empty response body');
+      console.log('Empty response body')
+      return data; 
+    }
+    
+    try {
+      data = JSON.parse(text1);
+      //data = { ...data, JSON.parse(text2) }
+      data.type = JSON.parse(text2)
+    } catch (err) {
+      throw new Error('Invalid JSON: ' + err.message);
+    }    
+    // const data = await response.json();
+    // console.log('Search results:', data);
+    // // Ritual continues: render or process the archive
+    return data
+  } catch (error) {
+    console.error('Fetch error:', error);
+    console.log('url =', url1)
+    console.log('ur2 =', url2)
     return null; 
   }
 }
