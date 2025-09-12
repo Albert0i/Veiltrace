@@ -99,27 +99,38 @@ router.get('/view/:id', async (req, res) => {
     return res.status(404).send('Image not found on disk');
   }
 
-  // update imagetrace 
-  const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-  const r1 = await prisma.imagetrace.update({
-    where: { id }, // or use another unique field like fullPath
-    data: {
-      visited: { increment: 1 },         // increment visit count
-      updatedAt: updatedAt.toISOString() // set to current timestamp
-    }
-  });
-  // update vistatrace 
-  const r2 = await prisma.vistatrace.create({
-    data: {
-      imageId: id,                        // ID of the image being accessed
-      createdAt: updatedAt.toISOString()  // set to current timestamp
-    }
-  });
-  //console.log('r1 =', r1, ', r2 =', r2)
+  const uresult = await updateVeilTrace(id, 'view')
+  //console.log('uresult =', uresult)
+  // // update imagetrace 
+  // const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  // const r1 = await prisma.imagetrace.update({
+  //   where: { id }, // or use another unique field like fullPath
+  //   data: {
+  //     visited: { increment: 1 },         // increment visit count
+  //     updatedAt: updatedAt.toISOString() // set to current timestamp
+  //   }
+  // });
+  // // update vistatrace 
+  // const r2 = await prisma.vistatrace.create({
+  //   data: {
+  //     imageId: id,                        // ID of the image being accessed
+  //     createdAt: updatedAt.toISOString()  // set to current timestamp
+  //   }
+  // });
+  // //console.log('r1 =', r1, ', r2 =', r2)
 
   const mimeType = mime.getType(filePath) || 'application/octet-stream';
   res.setHeader('Content-Type', mimeType);
   res.status(200).sendFile(filePath);
+});
+
+router.post('/view', async (req, res) => {
+  const id = parseInt(req.body.id); // Extract ID from request body
+  const type = req.body.type
+  console.log('id =', id, ', type =', type);
+
+  const result = await updateVeilTrace(id, type);
+  res.json( result ); // Respond with the parsed ID
 });
 
 // ─── GET /types ───────────────────────────────────────────────
@@ -253,6 +264,29 @@ router.get('/status', async (req, res) => {
 });
 
 export default router;
+
+async function updateVeilTrace(id, type) {
+    // update imagetrace 
+    const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    const r1 = await prisma.imagetrace.update({
+      where: { id }, // or use another unique field like fullPath
+      data: {
+        visited: { increment: 1 },         // increment visit count
+        updatedAt: updatedAt.toISOString() // set to current timestamp
+      }
+    });
+    // update vistatrace 
+    const r2 = await prisma.vistatrace.create({
+      data: {
+        imageId: id,                        // ID of the image being accessed
+        type, 
+        createdAt: updatedAt.toISOString()  // set to current timestamp
+      }
+    });
+    //console.log('r1 =', r1, ', r2 =', r2)
+
+    return { r1, r2 }
+}
 
 const sample = [
   {

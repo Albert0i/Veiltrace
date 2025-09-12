@@ -146,11 +146,13 @@ router.get('/info', async (req, res) => {
 // });
 router.post('/export', async (req, res) => {
   //const ids = req.body.ids; // e.g. [7, 4, 16]
-  const { selected } = req.body;
+  let { selected } = req.body;
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'veiltrace-'));
   const HOST = process.env.HOST || 'localhost';
   const PORT = process.env.PORT || 3000;
 
+  if (typeof selected !== 'object') { selected = [ selected ]; }
+  console.log('selected =', selected)
   try {
     const filePaths = [];
 
@@ -166,25 +168,27 @@ router.post('/export', async (req, res) => {
       await fs.copyFile(sourcePath, destPath);
       filePaths.push({ path: destPath, name: filename });
 
-      // update imagetrace 
-      const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-      const r1 = await prisma.imagetrace.update({
-        where: { id: Number(id) }, // or use another unique field like fullPath
-        data: {
-          visited: { increment: 1 },         // increment visit count
-          updatedAt: updatedAt.toISOString() // set to current timestamp
-        }
-      });
-      // update vistatrace 
-      const r2 = await prisma.vistatrace.create({
-        data: {
-          imageId: Number(id),    // ID of the image being accessed
-          type: 'export',         // export
-          createdAt: updatedAt.toISOString()  // set to current timestamp
-        }
-      });
-      //console.log('r1 =', r1, ', r2 =', r2)
-        }
+      const result = await postUpdateVeilTrace(id, 'export')
+      //console.log('result =', result)
+      // // update imagetrace 
+      // const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+      // const r1 = await prisma.imagetrace.update({
+      //   where: { id: Number(id) }, // or use another unique field like fullPath
+      //   data: {
+      //     visited: { increment: 1 },         // increment visit count
+      //     updatedAt: updatedAt.toISOString() // set to current timestamp
+      //   }
+      // });
+      // // update vistatrace 
+      // const r2 = await prisma.vistatrace.create({
+      //   data: {
+      //     imageId: Number(id),    // ID of the image being accessed
+      //     type: 'export',         // export
+      //     createdAt: updatedAt.toISOString()  // set to current timestamp
+      //   }
+      // });
+      // //console.log('r1 =', r1, ', r2 =', r2)
+    }
 
     const zipName = `veiltrace_export_${Date.now()}.zip`;
     const zipPath = path.join(tempDir, zipName);
@@ -272,6 +276,29 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
     console.error('Search error:', error);
     console.log('url =', url)
     return null; 
+  }
+}
+
+async function postUpdateVeilTrace(id, type='view') {
+  try {
+    const response = await fetch('http://localhost:3000/api/v1/image/view', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id, type }) // Send ID in the body
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server responded with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    //console.log('✅ View trace recorded:', result);
+    return result 
+  } catch (error) {
+    console.error('❌ Failed to send view trace:', error);
+    return null
   }
 }
 
