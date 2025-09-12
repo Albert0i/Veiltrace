@@ -14,6 +14,7 @@
     @media (min-width: 1440px) { #veiltrace-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
     @media (min-width: 1680px) { #veiltrace-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
     @media (min-width: 1920px) { #veiltrace-grid { grid-template-columns: repeat(9, minmax(0, 1fr)); } }
+    @media (min-width: 2560px) { #veiltrace-grid { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
   </style>
   <script src="/assets/tailwind.js"></script>
 </head>
@@ -143,7 +144,8 @@
         <!-- Image Grid -->
         <!-- <div class="px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6"> -->
         <!-- <div class="px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-6"> -->
-        <div class="px-6 grid gap-6 grid-cols-1" id="veiltrace-grid">
+        <!-- <div class="px-6 grid gap-6 grid-cols-1" id="veiltrace-grid"> -->
+        <div class="grid px-6 gap-6" id="veiltrace-grid">
           <% results.forEach((item, index) => { %>
             <div class="relative border rounded shadow p-2 bg-white">
               <!-- Top Overlay -->
