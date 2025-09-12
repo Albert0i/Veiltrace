@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Veiltrace Info</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    @keyframes floatAround {
+      0%   { top: 5%; left: 10%; transform: rotate(0deg); }
+      20%  { top: 60%; left: 20%; transform: rotate(3deg); }
+      40%  { top: 30%; left: 70%; transform: rotate(-2deg); }
+      60%  { top: 80%; left: 40%; transform: rotate(4deg); }
+      80%  { top: 20%; left: 90%; transform: rotate(-3deg); }
+      100% { top: 5%; left: 10%; transform: rotate(0deg); }
+    }
+    
+    .floating-glyph {
+      animation: floatAround 20s ease-in-out infinite;
+    }
+  </style>
   <script src="/assets/tailwind.js"></script>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -18,38 +32,41 @@
         </div>
   
         <p class="text-lg text-gray-600 mt-2">        
-            Beneath the veil, silence breathes—light unfurls in quiet threads, and memory leans toward the unseen. Each image a gesture, each glyph a vow, drawn from the hush where time folds inward. What is traced is not forgotten; what is whispered, remains.
+            In the stillness between frames, echoes gather—soft as dust, sharp as longing. Every archive is a ritual, every trace a tether to what flickered and fled. The veil does not conceal—it cradles, it listens. Through the drift of light and the weight of shadow, the archive speaks in fragments: a vow repeated, a breath remembered. What is offered is not lost; what is seen is never alone.
         </p>
     </header>
 
     <!-- Info Section (tighter layout) -->
     <main class="max-w-xl mx-auto bg-white rounded-lg shadow">
         <section class="mb-2">
-        <div class="space-y-1 text-sm">
-            <div><strong>Version:</strong> <%= version %></div>
-            <div><strong>Images:</strong> <%= numImages %></div>
-            <div><strong>Vistas:</strong> <%= numVistas %></div>
-            <div><strong>Size:</strong> <%= size %> MB</div>
-            <div><strong>Visited:</strong> <%= visited %></div>
+            <div class="space-y-1 text-sm">
+                <div><strong>Version:</strong> <%= version %></div>
+                <div><strong>Images:</strong> <%= numImages %></div>
+                <div><strong>Vistas:</strong> <%= numVistas %></div>
+                <div><strong>Size:</strong> <%= size %> MB</div>
+                <div><strong>Visited:</strong> <%= visited %></div>
 
         </div>
         </section>
 
         <!-- File Format Breakdown -->
         <section class="mb-2">
-        <ul class="list-disc list-inside text-sm text-gray-900">
-            <% type.forEach(format => { %>
-            <li><%= format.fileFormat %>: <%= format.count %> images</li>
-            <% }) %>
-        </ul>
+            <ul class="list-disc list-inside text-sm text-gray-900">
+                <% type.forEach(format => { %>
+                <li><%= format.fileFormat %>: <%= format.count %> images</li>
+                <% }) %>
+            </ul>
         </section>
 
         <!-- Preview Image (clickable, smaller) -->
-        <section class="text-center">
-        <h2 class="text-md font-semibold mb-2">Random image</h2>
-        <a href="/view/<%= randomId %>" target="_blank" rel="noopener">
-            <img src="/api/v1/image/preview/<%= randomId %>" alt="Preview Image" class="rounded shadow max-w-xs h-auto mx-auto hover:opacity-90 transition">
-        </a>
+        <section class="text-center">            
+            <section class="fixed inset-0 overflow-hidden z-10">
+                <a href="/view/<%= randomId %>" target="_blank" rel="noopener">
+                  <img src="/api/v1/image/preview/<%= randomId %>" 
+                       alt="Floating Preview" 
+                       class="floating-glyph h-32 absolute hover:opacity-90 transition">
+                </a>
+              </section>
         </section>
     </main>
 
