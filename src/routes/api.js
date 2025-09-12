@@ -127,7 +127,7 @@ router.get('/view/:id', async (req, res) => {
 router.post('/view', async (req, res) => {
   const id = parseInt(req.body.id); // Extract ID from request body
   const type = req.body.type
-  console.log('id =', id, ', type =', type);
+  //console.log('id =', id, ', type =', type);
 
   const result = await updateVeilTrace(id, type);
   res.json( result ); // Respond with the parsed ID

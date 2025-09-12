@@ -135,7 +135,18 @@ router.get('/view/:id', async (req, res) => {
 
 // Route to render info page
 router.get('/info', async (req, res) => {
-  res.render('info', {  });
+  res.render('info', {
+    version: "11.7.2-MariaDB",
+    numImages: 42,
+    numVistas: 10,
+    size: "1.59",
+    visited: 1,
+    type: [
+      { fileFormat: "JPEG", count: 3 },
+      { fileFormat: "JPG", count: 39 }
+    ],
+    randomId: 21
+  });
 });
 
 // POST "/export" — Handle export action
@@ -152,7 +163,7 @@ router.post('/export', async (req, res) => {
   const PORT = process.env.PORT || 3000;
 
   if (typeof selected !== 'object') { selected = [ selected ]; }
-  console.log('selected =', selected)
+  //console.log('selected =', selected)
   try {
     const filePaths = [];
 
@@ -217,6 +228,21 @@ router.post('/export', async (req, res) => {
     res.status(500).send('Export failed.');
   }
 });
+
+// router.get('/info', async (req, res) => {
+//   res.render('info', {
+//     version: "11.7.2-MariaDB",
+//     numImages: 42,
+//     numVistas: 10,
+//     size: "1.59",
+//     visited: 1,
+//     type: [
+//       { fileFormat: "JPEG", count: 3 },
+//       { fileFormat: "JPG", count: 39 }
+//     ],
+//     randomId: 21
+//   });
+// });
 
 export default router;
 

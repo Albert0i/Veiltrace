@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Veiltrace Info</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <script src="/assets/tailwind.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+  <div class="max-w-7xl mx-auto pt-6 pb-2 px-6">
+    <!-- Title & Subtitle -->
+    <header class="mb-2 text-center">
+        <div class="flex items-center justify-center space-x-4 mt-6">
+          <img src="/veiltrace.png" alt="Veiltrace Emblem" class="h-16 w-auto">
+          <h1 class="text-5xl font-serif font-semibold tracking-tight">Veiltrace</h1>
+        </div>
+  
+        <p class="text-lg text-gray-600 mt-2">        
+            Beneath the veil, silence breathes—light unfurls in quiet threads, and memory leans toward the unseen. Each image a gesture, each glyph a vow, drawn from the hush where time folds inward. What is traced is not forgotten; what is whispered, remains.
+        </p>
+    </header>
+
+    <!-- Info Section (tighter layout) -->
+    <main class="max-w-xl mx-auto bg-white rounded-lg shadow">
+        <section class="mb-2">
+        <div class="space-y-1 text-sm">
+            <div><strong>Version:</strong> <%= version %></div>
+            <div><strong>Images:</strong> <%= numImages %></div>
+            <div><strong>Vistas:</strong> <%= numVistas %></div>
+            <div><strong>Size:</strong> <%= size %> MB</div>
+            <div><strong>Visited:</strong> <%= visited === 1 ? 'Yes' : 'No' %></div>
+            <div><strong>Trace ID:</strong> <%= randomId %></div>
+        </div>
+        </section>
+
+        <!-- File Format Breakdown -->
+        <section class="mb-2">
+        <ul class="list-disc list-inside text-sm text-gray-900">
+            <% type.forEach(format => { %>
+            <li><%= format.fileFormat %>: <%= format.count %> images</li>
+            <% }) %>
+        </ul>
+        </section>
+
+        <!-- Preview Image (clickable, smaller) -->
+        <section class="text-center">
+        <h2 class="text-md font-semibold mb-2">Random preview</h2>
+        <a href="/view/<%= randomId %>" target="_blank" rel="noopener">
+            <img src="/api/v1/image/preview/<%= randomId %>" alt="Preview Image" class="rounded shadow max-w-xs h-auto mx-auto hover:opacity-90 transition">
+        </a>
+        </section>
+    </main>
+
+    <!-- Copilot Credit -->
+    <footer class="m-4 text-center text-sm text-gray-700">
+        <p>
+        Crafted in quiet partnership with  
+        <a href="https://copilot.microsoft.com" target="_blank" class="text-blue-600 font-semibold hover:underline">
+            Microsoft Copilot
+        </a> — <br />your poetic companion in code, ritual, and breath. Veiltrace. All traces remembered.
+        </p>
+    </footer>
+
+    </div>
+</body>
+</html>
