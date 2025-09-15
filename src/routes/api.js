@@ -287,21 +287,25 @@ router.get('/searchse', async (req, res) => {
 
 // GET http://localhost:3000/api/v1/image/status
 router.get('/status', async (req, res) => {
-  const [{ version }] = await prisma.$queryRaw`SELECT VERSION() AS version`;
-  const numImages = await prisma.imagetrace.count()
-  const numVistas = await prisma.vistatrace.count()
-  const [{ _, size }] = await await prisma.$queryRaw`
-                            SELECT table_name AS 'table',
-                                    ROUND((data_length + index_length) / 1024 / 1024, 2) AS 'size'
-                            FROM information_schema.tables
-                            WHERE table_schema = 'veiltrace' AND 
-                                  table_name in ('imagetrace', 'vistatrace');
-                            `;
-  const visited = await prisma.imagetrace.count({ 
-    where: {
-      visited: { gt: 0 }
-    }
-  })
+  const r1 = prisma.$queryRaw`SELECT VERSION() AS version`;
+  const r2 = prisma.imagetrace.count();
+  const r3 = prisma.vistatrace.count();
+  const r4 = prisma.$queryRaw`SELECT table_name AS 'table',
+                                      ROUND((data_length + index_length) / 1024 / 1024, 2) AS 'size'
+                              FROM information_schema.tables
+                              WHERE table_schema = 'veiltrace' AND 
+                                    table_name in ('imagetrace', 'vistatrace')`;
+  const r5 = prisma.imagetrace.count({ 
+                where: {
+                  visited: { gt: 0 }
+                }
+              })
+
+  const [[{ version }],
+            numImages, 
+            numVistas, 
+         [{ _, size }], 
+            visited ] = await Promise.all([r1, r2, r3, r4, r5]) 
 
   res.status(200).json( { 
                           version,
@@ -312,57 +316,35 @@ router.get('/status', async (req, res) => {
                       } );
 });
 
-export default router;
-
 async function updateVeilTrace(id, type) {
-    // update imagetrace 
-    const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-    const r1 = await prisma.imagetrace.update({
-      where: { id }, // or use another unique field like fullPath
-      data: {
-        visited: { increment: 1 },         // increment visit count
-        updatedAt: updatedAt.toISOString() // set to current timestamp
-      }
-    });
-    // update vistatrace 
-    const r2 = await prisma.vistatrace.create({
-      data: {
-        imageId: id,                        // ID of the image being accessed
-        type, 
-        createdAt: updatedAt.toISOString()  // set to current timestamp
-      }
-    });
-    //console.log('r1 =', r1, ', r2 =', r2)
+  // Current timestamp 
+  const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
 
-    return { r1, r2 }
+  // update imagetrace 
+  const r1 = prisma.imagetrace.update({
+    where: { id },                       // id of the image being accessed
+    data: {
+      visited: { increment: 1 },         // increment visit count
+      updatedAt: updatedAt.toISOString() // set to current timestamp
+    }
+  });
+  // update vistatrace 
+  const r2 = prisma.vistatrace.create({
+    data: {
+      imageId: id,                        // id of the image being accessed
+      type, 
+      createdAt: updatedAt.toISOString()  // set to current timestamp
+    }
+  });
+
+  const [ result1, result2 ] = await Promise.all([r1, r2])  
+  if (!result1) console.log('An error has occurred while updating imagetrace', result1)
+  if (!result2) console.log('An error has occurred while updating vistatrace', result2)    
+
+  return result1 && result2 ? true : false 
 }
 
-const sample = [
-  {
-    "id": 22,
-    "visited": 0,
-    "updatedAt": null,
-    "relevance": 4.93323230743408
-  },
-  {
-    "id": 20,
-    "visited": 0,
-    "updatedAt": null,
-    "relevance": 3.83695840835571
-  },
-  {
-    "id": 21,
-    "visited": 3,
-    "updatedAt": "2025-09-09T09:40:03.733Z",
-    "relevance": 2.74068450927734
-  },
-  {
-    "id": 19,
-    "visited": 0,
-    "updatedAt": null,
-    "relevance": 2.19254755973816
-  }
-]
+export default router;
 
 /*
    Full-Text Index Overview
