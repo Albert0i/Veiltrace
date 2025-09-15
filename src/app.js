@@ -43,3 +43,8 @@ process.on('SIGINT', async () => {
   // Perform cleanup here (e.g., close DB, stop server)
   process.exit(0); // Exit gracefully
 });
+
+/*
+   Favicon Generators
+   https://favicon.io/
+*/

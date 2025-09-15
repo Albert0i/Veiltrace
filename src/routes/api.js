@@ -1,23 +1,15 @@
-/**
- * ┌────────────────────────────────────────────────────────────┐
- * │                                                            │
- * │   Veiltrace API Routes — /api/v1/image/*                   │
- * │   Directly uses prismaClient and IImageTrace               │
- * │                                                            │
- * │   Crafted by Iong, guided by Albatross                     │
- * └────────────────────────────────────────────────────────────┘
- */
-
+import 'dotenv/config';
 import express from 'express';
-// Prisma 
-import { PrismaClient } from '../../src/generated/prisma/index.js'; 
 import path from 'path';
 import fs from 'fs';
 import mime from 'mime';
 
+// Prisma 
+import { PrismaClient } from '../../src/generated/prisma/index.js'; 
+
 // node-llama-cpp 
-import {fileURLToPath} from "url";
-import {getLlama} from "node-llama-cpp";
+import { fileURLToPath } from "url";
+import { getLlama } from "node-llama-cpp";
 
 // node-llama-cpp 
 const __dirname = path.dirname(
@@ -32,134 +24,195 @@ const context = await model.createEmbeddingContext();
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// ─── GET /info/:id ────────────────────────────────────────────
+// GET http://localhost:3000/api/v1/image/info/:id
 router.get('/info/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const result = await prisma.imagetrace.findUnique({
-    where: { id }, 
-    select: { 
-      imageName: true, fullPath: true,  fileFormat: true,  
-      fileSize: true,  meta: true,  description: true,  
-      visited: true,  updatedAt: true,  indexedAt: true,  
-      createdAt: true,  updateIdent: true
-    }
-  })
+  const id = parseInt(req.params.id, 10);
+  
+  if (isNaN(id)) 
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` })
 
-  res.status(result?200:404).json(result);
-});
-
-// ─── GET /vista/:imageId ────────────────────────────────────────────
-router.get('/vista/:imageId', async (req, res) => {
-  const imageId = parseInt(req.params.imageId);
-  const result = await prisma.vistatrace.findMany({
-    where: { imageId },
-    select: { id: true, type: true, createdAt: true },
-    orderBy: {
-      createdAt: 'desc'
+  try {
+    const result = await prisma.imagetrace.findUnique({
+      where: { id },
+      select: {
+        imageName: true, fullPath: true, fileFormat: true,
+        fileSize: true, meta: true, description: true,
+        visited: true, updatedAt: true, indexedAt: true,
+        createdAt: true, updateIdent: true
       }
-  })
+    });
 
-  res.status(result.length>0?200:204).json(result);
+    res.status(result?200:404).json(result);
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err.message });
+  }
 });
 
-// ─── GET /preview/:id ─────────────────────────────────────────
+// GET http://localhost:3000/api/v1/image/vista/:id
+router.get('/vista/:imageId', async (req, res) => {
+  const imageId = parseInt(req.params.imageId, 10);
+
+  if (isNaN(imageId)) 
+    return res.status(400).json({ message: `Invalid id '${req.params.imageId}'` })
+  
+  try {
+    const result = await prisma.vistatrace.findMany({
+      where: { imageId },
+      select: { id: true, type: true, createdAt: true },
+      orderBy: {
+        createdAt: 'desc'
+        }
+    })
+
+    res.status(result?200:404).json(result);
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err.message });
+  }
+});
+
+// GET http://localhost:3000/api/v1/image/preview/:id
 router.get('/preview/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const result = await prisma.imagetrace.findUnique({
-    where: { id }, 
-    select: { 
-      miniature: true
-    }
-  })
-  
-  if (!result?.miniature) {
-    return res.status(404).send('Preview not found');
-  }
+  const id = parseInt(req.params.id, 10);
 
-  res.set('Content-Type', 'image/jpeg');  // or 'image/png' if needed
-  res.status(200).send(result.miniature); // Send binary buffer directly
+  if (isNaN(id)) 
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` })
+
+  try {
+    const result = await prisma.imagetrace.findUnique({
+      where: { id }, 
+      select: { 
+        miniature: true
+      }
+    })
+
+    if (!result?.miniature) {
+      return res.status(404).json({ message: 'Preview not found' });
+    }
+  
+    res.set('Content-Type', 'image/jpeg');  // or 'image/png' if needed
+    res.status(200).send(result.miniature); // Send binary buffer directly
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err.message });
+  }
 });
 
-// ─── GET /source/:id ─────────────────────────────────────────
+// GET http://localhost:3000/api/v1/image/view/:id
 router.get('/view/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const result = await prisma.imagetrace.findUnique({
-    where: { id }, 
-    select: { 
-      fullPath: true
-    }
-  })
+  const id = parseInt(req.params.id, 10);
 
-  if (!result || !result.fullPath) {
-    return res.status(404).send('Image not found');
-  }
+  if (isNaN(id)) 
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` })
 
-  const filePath = path.resolve(result.fullPath);
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('Image not found on disk');
-  }
-
-  const uresult = await updateVeilTrace(id, 'view')
-  //console.log('uresult =', uresult)
-  // // update imagetrace 
-  // const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-  // const r1 = await prisma.imagetrace.update({
-  //   where: { id }, // or use another unique field like fullPath
-  //   data: {
-  //     visited: { increment: 1 },         // increment visit count
-  //     updatedAt: updatedAt.toISOString() // set to current timestamp
-  //   }
-  // });
-  // // update vistatrace 
-  // const r2 = await prisma.vistatrace.create({
-  //   data: {
-  //     imageId: id,                        // ID of the image being accessed
-  //     createdAt: updatedAt.toISOString()  // set to current timestamp
-  //   }
-  // });
-  // //console.log('r1 =', r1, ', r2 =', r2)
-
-  const mimeType = mime.getType(filePath) || 'application/octet-stream';
-  res.setHeader('Content-Type', mimeType);
-  res.status(200).sendFile(filePath);
-});
-
-router.post('/view', async (req, res) => {
-  const id = parseInt(req.body.id); // Extract ID from request body
-  const type = req.body.type
-  //console.log('id =', id, ', type =', type);
-
-  const result = await updateVeilTrace(id, type);
-  res.json( result ); // Respond with the parsed ID
-});
-
-// ─── GET /types ───────────────────────────────────────────────
-router.get('/type', async (req, res) => {
-  const result = await prisma.imagetrace.groupBy({
-    by: ['fileFormat'],
-    _count: { fileFormat: true }
-  });
+  try {
+    const result = await prisma.imagetrace.findUnique({
+      where: { id }, 
+      select: { 
+        fullPath: true
+      }
+    })
   
-  const formats = result.map(entry => ({
-    fileFormat: entry.fileFormat,
-    count: entry._count.fileFormat
-  }));  
+    if (!result || !result.fullPath) {
+      return res.status(404).json({ message: `Image not found for id '${id}'` });
+    }
+  
+    const filePath = path.resolve(result.fullPath);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: `Image not found on disk for id '${id}'` });
+    }
+  
+    const updateResult = await updateVeilTrace(id, 'view')
+    if (!updateResult) console.log('An error has occurred while updating veiltrace', updateResult)
 
-  res.json(formats);
+    const mimeType = mime.getType(filePath) || 'application/octet-stream';
+    res.setHeader('Content-Type', mimeType);
+    res.status(200).sendFile(filePath);
+
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err.message });
+  }
 });
 
-// ─── GET /search?query=xxx&offset=10&limit=10&expansion=true────────── 
+// POST http://localhost:3000/api/v1/image/view
+router.post('/view', async (req, res) => {
+  const id = parseInt(req.body.id, 10); // Extract ID from request body
+  const type = req.body.type
+
+  if (isNaN(id)) 
+    return res.status(400).json({ message: `Invalid id '${req.body.id}'` })
+
+  if (type !== 'view' && type !=='export') 
+    return res.status(400).json({ message: `Invalid type '${req.body.type}'` })
+
+  const updateResult = await updateVeilTrace(id, type);
+  if (!updateResult) console.log('An error has occurred while updating veiltrace', updateResult)
+
+  res.json({ success: updateResult? true: false }); // Respond with the parsed ID
+});
+
+// GET http://localhost:3000/api/v1/image/type
+router.get('/type', async (req, res) => {
+  try {
+    const result = await prisma.imagetrace.groupBy({
+      by: ['fileFormat'],
+      _count: { fileFormat: true },
+      orderBy: {
+        _count: {
+          fileFormat: 'desc'
+        }
+      }
+    });
+
+    // Map into a flat structure 
+    /*
+      [
+        {
+          "_count": {
+            "fileFormat": 39
+          },
+          "fileFormat": "JPG"
+        },
+        {
+          "_count": {
+            "fileFormat": 3
+          },
+          "fileFormat": "JPEG"
+        }
+      ]
+      ➡️➡️➡️
+      [
+        {
+          "fileFormat": "JPG",
+          "count": 39
+        },
+        {
+          "fileFormat": "JPEG",
+          "count": 3
+        }
+      ]
+    */
+    const formattedResult = result.map(entry => ({
+      fileFormat: entry.fileFormat,
+      count: entry._count.fileFormat
+    }));  
+
+    res.status(200).json(formattedResult);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Internal server error while grouping image formats',
+      error: err.message
+    });
+  }
+});
+
+// GET http://localhost:3000/api/v1/image/search?query=chin&offset=0&limit=10
 router.get('/search', async (req, res) => {
   const query = req.query.query?.trim();
-  const stype = req.query.stype
-  const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
-  const offset = parseInt(req.query.offset) || 0;
-  const limit = parseInt(req.query.limit) || 20;
-  const expansion = req.query.expansion === 'true'; // ← default is false
+  const offset = parseInt(req.query.offset, 10) || 0;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  
+  console.log('text-scan >> query =', query, ", offset =", offset, ", limit =", limit)
 
-  //console.log('text-scan >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
-
-  if (!query) return res.status(400).json({ error: 'Missing search query' });
+  if (!query) return res.status(400).json({ message: 'Missing search query' });
 
   const result = await prisma.imagetrace.findMany({
     where: {
@@ -176,21 +229,20 @@ router.get('/search', async (req, res) => {
     take: limit
   }); 
 
-  res.status(result.length>0?200:204).json(result);
+  res.status(result.length>0?200:404).json(result);
 });
 
-// ─── GET /searchft?query=xxx&offset=10&limit=10&expansion=true──────────
+// GET http://localhost:3000/api/v1/image/searchft?query=chinchilla&mode=natural&expansion=false&offset=0&limit=10
 router.get('/searchft', async (req, res) => {
   const query = req.query.query?.trim();
-  const stype = req.query.stype
   const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
   const offset = parseInt(req.query.offset) || 0;
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  //console.log('full-text >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  console.log('full-text >> query =', query, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
-  if (!query) return res.status(400).json({ error: 'Missing search query' });
+  if (!query) return res.status(400).json({ message: 'Missing search query' });
 
   const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
   const result = await prisma.$queryRawUnsafe(`
@@ -202,21 +254,18 @@ router.get('/searchft', async (req, res) => {
         LIMIT ? OFFSET ?;
       `, query, query, limit, offset);
 
-  res.status(result.length>0?200:204).json(result);
+  res.status(result.length>0?200:404).json(result);
 });
 
-// ─── GET /searchse?query=xxx&offset=10&limit=10&expansion=true────────── 
+// GET http://localhost:3000/api/v1/image/searchse?query=chinchilla&offset=0&limit=10
 router.get('/searchse', async (req, res) => {
   const query = req.query.query?.trim();
-  const stype = req.query.stype
-  const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
   const offset = parseInt(req.query.offset) || 0;
   const limit = parseInt(req.query.limit) || 20;
-  const expansion = req.query.expansion === 'true'; // ← default is false
+  
+  console.log('semantic >> query =', query, ", offset =", offset, ", limit =", limit)
 
-  //console.log('semantic >> query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
-
-  if (!query) return res.status(400).json({ error: 'Missing search query' });
+  if (!query) return res.status(400).json({ message: 'Missing search query' });
 
   const { vector } = await context.getEmbeddingFor(query);
 
@@ -230,13 +279,13 @@ router.get('/searchse', async (req, res) => {
                                id
                         FROM imagetrace 
                         ORDER BY 4 ASC
-                        LIMIT ${limit} OFFSET 0;
+                        LIMIT ${limit} OFFSET ${offset};
                       `; 
 
-  res.status(result.length>0?200:204).json(result);
+  res.status(result.length>0?200:404).json(result);
 });
 
-// ─── GET /status────────────────────────────────────────────────────
+// GET http://localhost:3000/api/v1/image/status
 router.get('/status', async (req, res) => {
   const [{ version }] = await prisma.$queryRaw`SELECT VERSION() AS version`;
   const numImages = await prisma.imagetrace.count()

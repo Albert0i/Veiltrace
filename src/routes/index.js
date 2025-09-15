@@ -1,19 +1,10 @@
-/**
- * ┌────────────────────────────────────────────────────────────┐
- * │                                                            │
- * │   Veiltrace Main Routes — /*                               │
- * │   Fetch from back end API                                  │
- * │                                                            │
- * │   Crafted by Iong, guided by Albatross                     │
- * └────────────────────────────────────────────────────────────┘
- */
-
 import 'dotenv/config';
 import express from 'express';
-import { promises as fs } from 'fs';
 import path from 'path';
+import { promises as fs } from 'fs';
 import os from 'os';
 import archiver from 'archiver';
+
 // Prisma 
 import { PrismaClient } from '../../src/generated/prisma/index.js'; 
 
@@ -250,8 +241,6 @@ router.post('/export', async (req, res) => {
 //   });
 // });
 
-export default router;
-
 async function fetchSearchResults(query, stype, mode, expansion, limit) {
   const params = new URLSearchParams({
     query: encodeURIComponent(query),
@@ -395,60 +384,4 @@ async function postUpdateVeilTrace(id, type='view') {
   }
 }
 
-const sample2 = {
-    "imageName": "539429830_767705962525439_1268665176191374100_n.jpg",
-    "fullPath": "D:/RU/Veiltrace/img/chin/539429830_767705962525439_1268665176191374100_n.jpg",
-    "fileFormat": "JPG",
-    "fileSize": 190,
-    "meta": "...",
-    "description": "...",
-    "visited": 0,
-    "updatedAt": null,
-    "indexedAt": "2025-09-11 09:22:08.865000",
-    "createdAt": "2025-09-01 08:10:12.554000",
-    "updateIdent": 0,
-    "vistas": [
-    {
-      "id": 3,
-      "type": "view",
-      "createdAt": "2025-09-11T10:55:18.469Z"
-    },
-    {
-      "id": 2,
-      "type": "view",
-      "createdAt": "2025-09-11T10:55:17.957Z"
-    },
-    {
-      "id": 1,
-      "type": "view",
-      "createdAt": "2025-09-11T10:55:16.285Z"
-    }
-  ] 
-}
-
-const sample = [
-  {
-    "id": 22,
-    "visited": 0,
-    "updatedAt": null,
-    "relevance": 4.93323230743408
-  },
-  {
-    "id": 20,
-    "visited": 0,
-    "updatedAt": null,
-    "relevance": 3.83695840835571
-  },
-  {
-    "id": 21,
-    "visited": 3,
-    "updatedAt": "2025-09-09T09:40:03.733Z",
-    "relevance": 2.74068450927734
-  },
-  {
-    "id": 19,
-    "visited": 0,
-    "updatedAt": null,
-    "relevance": 2.19254755973816
-  }
-]
+export default router;
