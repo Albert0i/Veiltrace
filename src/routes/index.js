@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 router.get('/', async (req, res) => {
   res.render('main', { 
     query: "",
-    stype: "full-text", 
+    stype: "text-scan", 
     mode: "natural", 
     expansion: false, 
     limit: 100, 
@@ -46,81 +46,47 @@ router.get('/view/:id', async (req, res) => {
   if (isNaN(id)) 
     return res.status(400).json({ message: `Invalid id '${req.params.id}'` })
 
-  const HOST = process.env.HOST || 'localhost';
-  const PORT = process.env.PORT || 3000;
   let data = []
   let vistas = []
 
-  // ImageTrace 
-  const url1 = `http://${HOST}:${PORT}/api/v1/image/info/${id}`;
+  const r1 = fetch(`http://${HOST}:${PORT}/api/v1/image/info/${id}`)
+  const r2 = fetch(`http://${HOST}:${PORT}/api/v1/image/vista/${id}`)
 
-  try {
-    const response = await fetch(url1);
+  const [ response1, response2 ] = await Promise.all([ r1, r2 ])
 
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-
-    if (!response.ok) {
-      const text = await response.text(); // safer fallback
-      throw new Error(`HTTP ${response.status}: ${text}`);
-    }
-  
-    const text = await response.text();
-        
-    if (!text) {
-      //throw new Error('Empty response body');
-      console.log('Empty response body')
-    }
-    
-    try {
-      data = JSON.parse(text);
-    } catch (err) {
-      throw new Error('Invalid JSON: ' + err.message);
-    }    
-    // const data = await response.json();
-    // console.log('Search results:', data);
-    // // Ritual continues: render or process the archive
-  } catch (error) {
-    console.error('Search error:', error);
-    console.log('url1 =', url1)
+  if (!response1.ok) {
+    throw new Error(`HTTP error: ${response1.status}`);
   }
-  // VistaTrace 
-  const url2 = `http://${HOST}:${PORT}/api/v1/image/vista/${id}`;
+  if (!response2.ok) {
+    throw new Error(`HTTP error: ${response2.status}`);
+  }
 
+  // ImageTrace 
+  const text1 = await response1.text();
+  if (!text1) {
+    //throw new Error('Empty response body');
+    console.log('Empty response body')  
+    return data
+  }
   try {
-    const response = await fetch(url2);
+    data = JSON.parse(text1);
+  } catch (err) {
+    throw new Error('Invalid JSON: ' + err.message);
+  }
 
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
+  // VistaTrace 
+  const text2 = await response2.text();
+  if (!text2) {
+    //throw new Error('Empty response body');
+    console.log('Empty response body')  
+    return data
+  }
+  try {
+    vistas = JSON.parse(text2);
+  } catch (err) {
+    throw new Error('Invalid JSON: ' + err.message);
+  }
 
-    if (!response.ok) {
-      const text = await response.text(); // safer fallback
-      throw new Error(`HTTP ${response.status}: ${text}`);
-    }
-  
-    const text = await response.text();
-        
-    if (!text) {
-      //throw new Error('Empty response body');
-      console.log('Empty response body')
-    }
-    
-    try {
-      vistas = JSON.parse(text);
-    } catch (err) {
-      throw new Error('Invalid JSON: ' + err.message);
-    }    
-    // const data = await response.json();
-    // console.log('Search results:', data);
-    // // Ritual continues: render or process the archive
-  } catch (error) {
-    console.error('Search error:', error);
-    console.log('url2 =', url2)
-  }  
-
-  //res.render('view', {id, ...sample2 });
   res.render('view', {id, ...data, vistas });
 });
 
@@ -138,8 +104,6 @@ router.post('/export', async (req, res) => {
   //const ids = req.body.ids; // e.g. [7, 4, 16]
   let { selected } = req.body;
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'veiltrace-'));
-  const HOST = process.env.HOST || 'localhost';
-  const PORT = process.env.PORT || 3000;
 
   if (typeof selected !== 'object') { selected = [ selected ]; }
   //console.log('selected =', selected)
@@ -159,25 +123,9 @@ router.post('/export', async (req, res) => {
       filePaths.push({ path: destPath, name: filename });
 
       const result = await postUpdateVeilTrace(id, 'export')
-      //console.log('result =', result)
-      // // update imagetrace 
-      // const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-      // const r1 = await prisma.imagetrace.update({
-      //   where: { id: Number(id) }, // or use another unique field like fullPath
-      //   data: {
-      //     visited: { increment: 1 },         // increment visit count
-      //     updatedAt: updatedAt.toISOString() // set to current timestamp
-      //   }
-      // });
-      // // update vistatrace 
-      // const r2 = await prisma.vistatrace.create({
-      //   data: {
-      //     imageId: Number(id),    // ID of the image being accessed
-      //     type: 'export',         // export
-      //     createdAt: updatedAt.toISOString()  // set to current timestamp
-      //   }
-      // });
-      // //console.log('r1 =', r1, ', r2 =', r2)
+      if (!result) {
+        console.error(`Failed to update veiltrace for ${id}`, id);
+      }
     }
 
     const zipName = `veiltrace_export_${Date.now()}.zip`;
@@ -204,6 +152,7 @@ router.post('/export', async (req, res) => {
   } catch (err) {
     console.error('Export error:', err);
     await fs.rm(tempDir, { recursive: true, force: true });
+    
     res.status(500).send('Export failed.');
   }
 });
@@ -227,18 +176,13 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
     default:
       stype = ""
   }
-  const url = `http://${HOST}:${PORT}/api/v1/image/search${stype}?${params.toString()}`;
+  const searchUrl = `http://${HOST}:${PORT}/api/v1/image/search${stype}?${params.toString()}`;
 
   try {
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
+    const response = await fetch(searchUrl);
 
     if (!response.ok) {
-      const text = await response.text(); // safer fallback
-      throw new Error(`HTTP ${response.status}: ${text}`);
+      throw new Error(`HTTP error: ${response.status}`);
     }
   
     const text = await response.text();
@@ -246,7 +190,7 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
     
     if (!text) {
       //throw new Error('Empty response body');
-      console.log('Empty response body')
+      // console.log(`Empty response body for ${params.get('stype')} query '${query}'`)
       return data; 
     }
     
@@ -255,13 +199,11 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
     } catch (err) {
       throw new Error('Invalid JSON: ' + err.message);
     }    
-    // const data = await response.json();
     // console.log('Search results:', data);
-    // // Ritual continues: render or process the archive
     return data
   } catch (error) {
     console.error('Search error:', error);
-    console.log('url =', url)
+    console.log('searchUrl =', searchUrl)
     return null; 
   }
 }

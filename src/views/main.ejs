@@ -64,15 +64,35 @@
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-900 mb-1">Search Type</label>
           <div class="flex flex-col space-y-2 text-md">
+
             <label>
-              <input type="radio" name="stype" id="typeScan" value="text-scan" <%= stype === 'text-scan' ? 'checked' : '' %>>
+              <input type="radio" name="stype" value="text-scan" <%= stype === 'text-scan' ? 'checked' : '' %>>
               Text Scan
             </label>
         
-            <label>
+            <label class="flex items-center space-x-1">
               <input type="radio" name="stype" value="full-text" <%= stype === 'full-text' ? 'checked' : '' %>>
-              <a class="text-blue-600 dark:text-blue-500 hover:underline" href="https://mariadb.com/docs/server/ha-and-performance/optimization-and-tuning/optimization-and-indexes/full-text-indexes/full-text-index-overview" target="_blank">Full Text Search</a>
+              <span>Full Text Search</span>
+              <a href="https://mariadb.com/docs/server/ha-and-performance/optimization-and-tuning/optimization-and-indexes/full-text-indexes/full-text-index-overview"
+                 target="_blank" rel="noopener"
+                 class="text-blue-500 hover:text-blue-700 transition" title="Learn more about fulltext search">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                </svg>
+              </a>
             </label>
+
+            <!-- <span class="inline-flex items-center space-x-1 text-sm text-gray-500">
+              <span>Fulltext search</span>
+              <a href="https://example.com/fulltext-docs" target="_blank" rel="noopener"
+                 class="text-blue-500 hover:text-blue-700 transition" title="Learn more about fulltext search">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                </svg>
+              </a>
+            </span> -->
             <!-- Inline nested options -->
             <div id="fullTextOptions" class="flex items-center space-x-4 ml-4 text-sm text-gray-900">
               <label class="flex items-center space-x-1">
@@ -95,6 +115,7 @@
               Semantic Search
             </label>
           </div>
+
         </div>
 
         <button type="submit"
