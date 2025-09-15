@@ -135,13 +135,21 @@ Seed database with:
 npx prisma db seed
 ```
 
+
+#### II. Veiltrace System
 Next, to start the server with: 
 ```
 npm run dev
 ```
 
+Availale URLs: 
+```
+http://localhost:3000/ - Main page
+http://localhost:3000/view/:id - View page 
+http://localhost:3000/info - Info page 
+```
 
-#### II. 
+API Endpoints: 
 ```
 http://localhost:3000/api/v1/image/info/:id - Get image information
 http://localhost:3000/api/v1/image/vista/:id - Get image visited log
@@ -155,15 +163,7 @@ http://localhost:3000/api/v1/image/status - System status
 ```
 
 
-#### III. 
-
-
-#### IV. 
-
-
-
-
-#### V. Bibliography 
+#### III. Bibliography 
 1. [Redis AI challenge winners + Live vector search demo (with dev.to)](https://youtu.be/lBIdrGiDMok)
 2. [llama.cpp](https://github.com/ggml-org/llama.cpp)
 3. [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022)
