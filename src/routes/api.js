@@ -27,7 +27,7 @@ const router = express.Router();
 // GET http://localhost:3000/api/v1/image/info/:id
 router.get('/info/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const fullPathOnly = req.query.fullpathOnly || false;
+  const fullPathOnly = req.query.fullPathOnly || false;
   
   if (isNaN(id)) 
     return res.status(400).json({ message: `Invalid id '${req.params.id}'` })
