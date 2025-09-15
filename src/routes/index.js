@@ -111,10 +111,10 @@ router.post('/export', async (req, res) => {
     const filePaths = [];
 
     for (const id of selected) {
-      const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/info/${id}`);
+      const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/info/${id}?fullpathOnly=true`);
       if (!response.ok) throw new Error(`Failed to fetch metadata for ID ${id}`);
       const data = await response.json();
-
+      
       const sourcePath = data.fullPath;
       const filename = path.basename(sourcePath);
       const destPath = path.join(tempDir, filename);
