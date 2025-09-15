@@ -210,7 +210,7 @@ router.get('/search', async (req, res) => {
   const offset = parseInt(req.query.offset, 10) || 0;
   const limit = parseInt(req.query.limit, 10) || 20;
   
-  console.log('text-scan >> query =', query, ", offset =", offset, ", limit =", limit)
+  //console.log('text-scan >> query =', query, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ message: 'Missing search query' });
 
@@ -229,7 +229,7 @@ router.get('/search', async (req, res) => {
     take: limit
   }); 
 
-  res.status(result.length>0?200:404).json(result);
+  res.status(result.length>0?200:204).json(result);
 });
 
 // GET http://localhost:3000/api/v1/image/searchft?query=chinchilla&mode=natural&expansion=false&offset=0&limit=10
@@ -240,7 +240,7 @@ router.get('/searchft', async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const expansion = req.query.expansion === 'true'; // ← default is false
 
-  console.log('full-text >> query =', query, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
+  //console.log('full-text >> query =', query, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ message: 'Missing search query' });
 
@@ -254,7 +254,7 @@ router.get('/searchft', async (req, res) => {
         LIMIT ? OFFSET ?;
       `, query, query, limit, offset);
 
-  res.status(result.length>0?200:404).json(result);
+  res.status(result.length>0?200:204).json(result);
 });
 
 // GET http://localhost:3000/api/v1/image/searchse?query=chinchilla&offset=0&limit=10
@@ -263,7 +263,7 @@ router.get('/searchse', async (req, res) => {
   const offset = parseInt(req.query.offset) || 0;
   const limit = parseInt(req.query.limit) || 20;
   
-  console.log('semantic >> query =', query, ", offset =", offset, ", limit =", limit)
+  //console.log('semantic >> query =', query, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ message: 'Missing search query' });
 
@@ -282,7 +282,7 @@ router.get('/searchse', async (req, res) => {
                         LIMIT ${limit} OFFSET ${offset};
                       `; 
 
-  res.status(result.length>0?200:404).json(result);
+  res.status(result.length>0?200:204).json(result);
 });
 
 // GET http://localhost:3000/api/v1/image/status

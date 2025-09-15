@@ -5,13 +5,11 @@ import { promises as fs } from 'fs';
 import os from 'os';
 import archiver from 'archiver';
 
-// Prisma 
-import { PrismaClient } from '../../src/generated/prisma/index.js'; 
-
-const prisma = new PrismaClient();
 const router = express.Router();
+const HOST = process.env.HOST || 'localhost';
+const PORT = process.env.PORT || 3000;
 
-// GET "/" — Main search page
+// GET http://localhost:3000/
 router.get('/', async (req, res) => {
   res.render('main', { 
     query: "",
@@ -23,7 +21,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-// POST "/" — Handle search form
+// POST http://localhost:3000/
 router.post('/', async (req, res) => {
   const { query, stype, mode, expansion, limit } = req.body;
 
@@ -41,10 +39,12 @@ router.post('/', async (req, res) => {
   });
 });
 
-// Route to render view page
+// GET http://localhost:3000/view/:id
 router.get('/view/:id', async (req, res) => {
-  const id = req.params.id;
-  //console.log('id =', id)
+  const id = parseInt(req.params.id, 10);
+  
+  if (isNaN(id)) 
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` })
 
   const HOST = process.env.HOST || 'localhost';
   const PORT = process.env.PORT || 3000;
@@ -124,34 +124,16 @@ router.get('/view/:id', async (req, res) => {
   res.render('view', {id, ...data, vistas });
 });
 
-// Route to render info page
+// GET http://localhost:3000/info
 router.get('/info', async (req, res) => {
   const info = await fetchSystemInfo()
-  // res.render('info', {
-  //   version: "11.7.2-MariaDB",
-  //   numImages: 42,
-  //   numVistas: 10,
-  //   size: "1.59",
-  //   visited: 1,
-  //   type: [
-  //     { fileFormat: "JPEG", count: 3 },
-  //     { fileFormat: "JPG", count: 39 }
-  //   ],
-  //   randomId: 21
-  // });
-  //console.log(info.type)
   const total = info.type.reduce((sum, item) => sum + item.count, 0);
   const randomId = Math.floor(Math.random() * total) + 1;
-  //console.log('info =', {...info, randomId})
+  
   res.render('info', {...info, randomId})
 });
 
-// POST "/export" — Handle export action
-// router.post('/export', async (req, res) => {
-//   const { selected } = req.body;
-//   // Placeholder: await your instructions
-//   res.send(`Exporting images: ${selected}`);
-// });
+// GET http://localhost:3000/export/:id
 router.post('/export', async (req, res) => {
   //const ids = req.body.ids; // e.g. [7, 4, 16]
   let { selected } = req.body;
@@ -226,21 +208,6 @@ router.post('/export', async (req, res) => {
   }
 });
 
-// router.get('/info', async (req, res) => {
-//   res.render('info', {
-//     version: "11.7.2-MariaDB",
-//     numImages: 42,
-//     numVistas: 10,
-//     size: "1.59",
-//     visited: 1,
-//     type: [
-//       { fileFormat: "JPEG", count: 3 },
-//       { fileFormat: "JPG", count: 39 }
-//     ],
-//     randomId: 21
-//   });
-// });
-
 async function fetchSearchResults(query, stype, mode, expansion, limit) {
   const params = new URLSearchParams({
     query: encodeURIComponent(query),
@@ -249,6 +216,7 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
     expansion: expansion ? true : false, 
     limit
   });
+
   switch(params.get('stype')) {
     case "full-text":
       stype = "ft"
@@ -259,13 +227,11 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
     default:
       stype = ""
   }
-  const HOST = process.env.HOST || 'localhost';
-  const PORT = process.env.PORT || 3000;
   const url = `http://${HOST}:${PORT}/api/v1/image/search${stype}?${params.toString()}`;
 
   try {
     const response = await fetch(url);
-
+    
     if (!response.ok) {
       throw new Error(`HTTP error: ${response.status}`);
     }
@@ -301,14 +267,11 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
 }
 
 async function fetchSystemInfo() {
-  const HOST = process.env.HOST || 'localhost';
-  const PORT = process.env.PORT || 3000;
-  const url1 = `http://${HOST}:${PORT}/api/v1/image/status`;
-  const url2 = `http://${HOST}:${PORT}/api/v1/image/type`;
-
   try {
-    const response1 = await fetch(url1);
-    const response2 = await fetch(url2);
+    const r1 = fetch(`http://${HOST}:${PORT}/api/v1/image/status`);
+    const r2 = fetch(`http://${HOST}:${PORT}/api/v1/image/type`);
+
+    const [ response1, response2 ] = await Promise.all([ r1, r2 ])
 
     if (!response1.ok) {
       throw new Error(`HTTP error: ${response1.status}`);
@@ -317,58 +280,39 @@ async function fetchSystemInfo() {
       throw new Error(`HTTP error: ${response2.status}`);
     }
 
-    if (!response1.ok) {
-      const text = await response1.text(); // safer fallback
-      throw new Error(`HTTP ${response1.status}: ${text}`);
-    }
-    if (!response2.ok) {
-      const text = await response2.text(); // safer fallback
-      throw new Error(`HTTP ${response2.status}: ${text}`);
-    }
+    const [ text1, text2 ] = await Promise.all([ response1.text(), response2.text() ])
 
-    const text1 = await response1.text();
-    const text2 = await response2.text();
-
-    let data = []
-    
     if (!text1) {
-      //throw new Error('Empty response body');
-      console.log('Empty response body')
+      console.log('Empty response1 body')
       return data; 
     }
     if (!text2) {
-      //throw new Error('Empty response body');
-      console.log('Empty response body')
+      console.log('Empty response2 body')
       return data; 
     }
     
+    let data = []
     try {
       data = JSON.parse(text1);
-      //data = { ...data, JSON.parse(text2) }
       data.type = JSON.parse(text2)
     } catch (err) {
       throw new Error('Invalid JSON: ' + err.message);
     }    
-    // const data = await response.json();
-    // console.log('Search results:', data);
-    // // Ritual continues: render or process the archive
     return data
   } catch (error) {
     console.error('Fetch error:', error);
-    console.log('url =', url1)
-    console.log('ur2 =', url2)
     return null; 
   }
 }
 
 async function postUpdateVeilTrace(id, type='view') {
   try {
-    const response = await fetch('http://localhost:3000/api/v1/image/view', {
+    const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/view`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ id, type }) // Send ID in the body
+      body: JSON.stringify({ id, type }) // Send id and type in the body
     });
 
     if (!response.ok) {
@@ -376,10 +320,10 @@ async function postUpdateVeilTrace(id, type='view') {
     }
 
     const result = await response.json();
-    //console.log('✅ View trace recorded:', result);
+    //console.log('result =', result);
     return result 
   } catch (error) {
-    console.error('❌ Failed to send view trace:', error);
+    console.error('Failed to update veiltrace', error);
     return null
   }
 }
