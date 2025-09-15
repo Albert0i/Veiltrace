@@ -24,6 +24,9 @@ app.use(cookieParser());
 
 app.use('/', indexRouter);
 app.use('/api/v1/image', apiRouter);
+app.use((req, res) => {
+  res.status(404).render('404');
+});
 
 // 🌿 Ritual sweep before the archive awakens
 await cleanupTempFolders();
