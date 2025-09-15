@@ -99,7 +99,7 @@ router.get('/info', async (req, res) => {
   res.render('info', {...info, randomId})
 });
 
-// GET http://localhost:3000/export/:id
+// POST http://localhost:3000/export
 router.post('/export', async (req, res) => {
   //const ids = req.body.ids; // e.g. [7, 4, 16]
   let { selected } = req.body;
@@ -152,7 +152,7 @@ router.post('/export', async (req, res) => {
   } catch (err) {
     console.error('Export error:', err);
     await fs.rm(tempDir, { recursive: true, force: true });
-    
+
     res.status(500).send('Export failed.');
   }
 });
