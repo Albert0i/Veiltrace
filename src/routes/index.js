@@ -103,14 +103,17 @@ router.get('/info', async (req, res) => {
 router.post('/export', async (req, res) => {
   //const ids = req.body.ids; // e.g. [7, 4, 16]
   let { selected } = req.body;
+  // Create a temporary directory using the system’s temp folder.
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'veiltrace-'));
 
+  // If 'selected' is a single value, it’s wrapped into an array.
   if (typeof selected !== 'object') { selected = [ selected ]; }
   //console.log('selected =', selected)
   try {
     const filePaths = [];
 
     for (const id of selected) {
+      // Fetch Metadata and Copy Files
       const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/info/${id}?fullPathOnly=true`);
       if (!response.ok) throw new Error(`Failed to fetch metadata for ID ${id}`);
       const data = await response.json();
@@ -122,12 +125,14 @@ router.post('/export', async (req, res) => {
       await fs.copyFile(sourcePath, destPath);
       filePaths.push({ path: destPath, name: filename });
 
+      // Update veiltrace 
       const result = await postUpdateVeilTrace(id, 'export')
       if (!result) {
         console.error(`Failed to update veiltrace for ${id}`, id);
       }
     }
 
+    // Create the ZIP Archive and places it inside the temporary folder.
     const zipName = `veiltrace_export_${Date.now()}.zip`;
     const zipPath = path.join(tempDir, zipName);
 
@@ -135,16 +140,21 @@ router.post('/export', async (req, res) => {
     const output = await fs.open(zipPath, 'w');
     const stream = output.createWriteStream();
 
+    // Sets up the ZIP archive and output stream.
     archive.pipe(stream);
+
+    // Adds each copied image to the archive under a 'veiltrace' folder.
     filePaths.forEach(file => {
       //archive.file(file.path, { name: file.name });
       archive.file(file.path, { name: `veiltrace/${file.name}` });
     });
-
+    // Finalizes the ZIP.
     await archive.finalize();
 
+    // Send the ZIP to the User - via 'res.download'.
     stream.on('close', async () => {
       res.download(zipPath, zipName, async () => {
+        // Deletes the temporary folder afterward
         await fs.rm(tempDir, { recursive: true, force: true });
       });
     });
