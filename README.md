@@ -142,6 +142,8 @@ Next, to start the server with:
 npm run dev
 ```
 
+![alt main](imgx/veiltrace-main.JPG)
+
 Available URLs: 
 ```
 http://localhost:3000/ - Main page
