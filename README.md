@@ -142,7 +142,7 @@ Next, to start the server with:
 npm run dev
 ```
 
-Availale URLs: 
+Available URLs: 
 ```
 http://localhost:3000/ - Main page
 http://localhost:3000/view/:id - View page 
