@@ -341,7 +341,9 @@ router.post('/archive', async (req, res) => {
   // Current timestamp 
   const createdAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
   const description = req.body.description || `Archive ${createdAt.toISOString()}`;
+  const ids = req.body.ids
 
+  console.log('ids = ', ids)
   try {
     const result = await prisma.archivetrace.create({
       data: {

@@ -16,57 +16,12 @@ PUT http://localhost:3000/api/v1/image/archive/21
 Content-Type: application/json
 
 {
-  "action": "add", 
-  "ids": [ 7, 14, 21, 28, 35 ]
+  "action": "remove", 
+  "ids": [ 3, 5 ]
 }
 
 ### Delete an archive
 DELETE http://localhost:3000/api/v1/image/archive/10
-
-
-
-### DAO_DATASTORE 
-OPTIONS http://localhost:3000/api/v1/posts
-Content-Type: application/json
-
-### Get all posts
-GET http://localhost:3000/api/v1/posts
-Content-Type: application/json
-
-### Get all posts with optional parameters 
-GET http://localhost:3000/api/v1/posts?limit=3&offset=1&id=98
-Content-Type: applicatio
-
-### Find posts with 'exercitationem'
-GET http://localhost:3000/api/v1/posts/find/exercitationem
-Content-Type: applicatio
-
-### Get single post
-GET http://localhost:3000/api/v1/posts/66
-Content-Type: application/json
-
-### Create new post
-POST http://localhost:3000/api/v1/posts
-Content-Type: application/json
-
-{
-  "userId": 111, 
-  "title": "Stars", 
-  "body": "Stars, staring and shinning on us over centries, can only be seen in dark nights. Those little silvery dots bear memories from the most remote era dating from the very creation of universe. \n\nIn secular and religious belief, there exists two kinds of stars. One that bring much fortune while the other fortell bad lucks, or presentiment of disasters."
-}
-
-### Update a post
-PUT http://localhost:3000/api/v1/posts/101
-Content-Type: application/json
-
-{
-  "userId": 111, 
-  "title": "What is Lorem Ipsum?", 
-  "body": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
-}
-
-### Delete a post
-DELETE http://localhost:3000/api/v1/posts/101
 
 
 # 

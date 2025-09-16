@@ -167,18 +167,23 @@ router.post('/export', async (req, res) => {
   }
 });
 
-// POST http://localhost:3000/save
-router.post('/save', async (req, res) => {
+// POST http://localhost:3000/archive
+router.post('/archive', async (req, res) => {
   //const ids = req.body.ids; // e.g. [7, 4, 16]
   let { selected } = req.body;
 
   // If 'selected' is a single value, it’s wrapped into an array.
-  if (typeof selected !== 'object') { selected = [ selected ]; }
+  if (!selected) 
+    selected = [] 
+  else if (typeof selected !== 'object') 
+    { selected = [ selected ]; } 
   console.log('selected =', selected)
 
+
   //res.status(200).json( selected )
-  res.render('save', { savedLists });
+  res.render('archive', { archives: await fetchArchives(), ids: selected });
 })  
+
 
 async function fetchSearchResults(query, stype, mode, expansion, limit) {
   const params = new URLSearchParams({
@@ -227,6 +232,32 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
   } catch (error) {
     console.error('Search error:', error);
     console.log('searchUrl =', searchUrl)
+    return null; 
+  }
+}
+
+async function fetchArchives() {
+  try {    
+    const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/archive`)
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response1.status}`);
+    }
+    const text = await response.text()
+
+    if (!text) {
+      console.log('Empty response1 body')
+      return null; 
+    }    
+    let data = []
+    try {
+      data = JSON.parse(text);      
+    } catch (err) {
+      throw new Error('Invalid JSON: ' + err.message);
+    }    
+    return data
+  } catch (error) {
+    console.error('Fetch error:', error);
     return null; 
   }
 }
@@ -297,35 +328,27 @@ export default router;
 
 const savedLists = [
   {
-    "id": 4,
-    "description": "Echoes from Xiangzhou",
-    "imageIds": "[7, 4, 16]",
+    "id": 21,
+    "description": "Archive 2025-09-16T15:11:20.828Z",
+    "imageIds": "[7,14,21,28,1,9]",
+    "updatedAt": "2025-09-16T15:18:03.796Z",
+    "createdAt": "2025-09-16T15:11:20.828Z",
+    "updateIdent": 5
+  },
+  {
+    "id": 20,
+    "description": "Stars, staring and shinning on us over centries, can only be seen in dark nights.",
+    "imageIds": "[]",
     "updatedAt": null,
-    "createdAt": "2025-09-16 10:45:43",
+    "createdAt": "2025-09-16T15:11:10.833Z",
     "updateIdent": 0
   },
   {
-    "id": 1,
-    "description": "Testing 1",
-    "imageIds": "[ 1, 2, 3 ]",
+    "id": 22,
+    "description": "Stars, staring and shinning on us over centries, can only be seen in dark nights.",
+    "imageIds": "[]",
     "updatedAt": null,
-    "createdAt": "2025-09016",
-    "updateIdent": 0
-  },
-  {
-    "id": 2,
-    "description": "Testing 2",
-    "imageIds": "[ 1, 2, 3, 4, 5 ]",
-    "updatedAt": null,
-    "createdAt": "2025-09016",
-    "updateIdent": 0
-  },
-  {
-    "id": 3,
-    "description": "Testing 3",
-    "imageIds": "[ 1, 2, 3, 1, 2 ]",
-    "updatedAt": null,
-    "createdAt": "2025-09016",
+    "createdAt": "2025-09-16T15:13:54.231Z",
     "updateIdent": 0
   }
-];
+]
