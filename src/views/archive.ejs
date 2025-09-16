@@ -30,8 +30,8 @@
             <div class="text-xl font-bold text-indigo-700 mb-2">
               <%= index + 1 %>.
             </div>
-            <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded shadow-sm text-sm" onclick="addToArchive('<%= item.id %>', '<%= ids %>')">
-              Add to
+            <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded shadow-sm text-sm" onclick="addToArchive('<%= item.id %>')">
+              To here
             </button>
           </div>
 
@@ -105,7 +105,8 @@
         });
 
         if (response.ok) {
-          alert(`Added ${ids.length} image(s) to archive ${archiveId}`);
+          //alert(`Added ${ids.length} image(s) to archive ${archiveId}`);
+          location.reload();
         } else {
           const error = await response.json();
           alert(`Failed: ${error.message}`);
