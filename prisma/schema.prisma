@@ -43,6 +43,15 @@ model vistatrace {
   @@index([imageId], map: "idx_vista_image_ref")
 }
 
+model archivetrace {
+  id          Int     @id @default(autoincrement())
+  description String?
+  imageIds    String? @db.LongText
+  updatedAt   String?
+  createdAt   String
+  updateIdent Int     @default(0)
+}
+
 enum vistatrace_type {
   view
   export

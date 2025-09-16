@@ -167,6 +167,18 @@ router.post('/export', async (req, res) => {
   }
 });
 
+// POST http://localhost:3000/export
+router.post('/save', async (req, res) => {
+  //const ids = req.body.ids; // e.g. [7, 4, 16]
+  let { selected } = req.body;
+
+  // If 'selected' is a single value, it’s wrapped into an array.
+  if (typeof selected !== 'object') { selected = [ selected ]; }
+  console.log('selected =', selected)
+
+  res.status(200).json( selected )
+})  
+
 async function fetchSearchResults(query, stype, mode, expansion, limit) {
   const params = new URLSearchParams({
     query: encodeURIComponent(query),

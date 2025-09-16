@@ -40,3 +40,28 @@ CREATE OR REPLACE TABLE vistatrace
   KEY idx_vista_image_ref (imageId),
   CONSTRAINT VistaTrace_imageId_fkey FOREIGN KEY (imageId) REFERENCES imagetrace (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+
+-- veiltrace.archivetrace definition (with JSON array)
+CREATE OR REPLACE TABLE archivetrace 
+(
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  description VARCHAR(191) DEFAULT NULL,
+  -- imageIds LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  imageIds JSON CHECK (JSON_VALID(imageIds)),
+
+  updatedAt VARCHAR(191) DEFAULT NULL,
+  createdAt VARCHAR(191) NOT NULL,
+  updateIdent INT(11) NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (id),
+  CHECK (JSON_VALID(imageIds))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- INSERT INTO archivetrace (description, imageIds, createdAt) VALUES('Testing 1', '[ 1, 2, 3 ]', '2025-09016')
+--
+-- JSON Data Type
+-- https://mariadb.com/docs/server/reference/data-types/string-data-types/json
+-- 
