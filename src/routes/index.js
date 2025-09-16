@@ -167,7 +167,7 @@ router.post('/export', async (req, res) => {
   }
 });
 
-// POST http://localhost:3000/export
+// POST http://localhost:3000/save
 router.post('/save', async (req, res) => {
   //const ids = req.body.ids; // e.g. [7, 4, 16]
   let { selected } = req.body;
@@ -176,7 +176,8 @@ router.post('/save', async (req, res) => {
   if (typeof selected !== 'object') { selected = [ selected ]; }
   console.log('selected =', selected)
 
-  res.status(200).json( selected )
+  //res.status(200).json( selected )
+  res.render('save', { savedLists });
 })  
 
 async function fetchSearchResults(query, stype, mode, expansion, limit) {
@@ -293,3 +294,38 @@ async function postUpdateVeilTrace(id, type='view') {
 }
 
 export default router;
+
+const savedLists = [
+  {
+    "id": 4,
+    "description": "Echoes from Xiangzhou",
+    "imageIds": "[7, 4, 16]",
+    "updatedAt": null,
+    "createdAt": "2025-09-16 10:45:43",
+    "updateIdent": 0
+  },
+  {
+    "id": 1,
+    "description": "Testing 1",
+    "imageIds": "[ 1, 2, 3 ]",
+    "updatedAt": null,
+    "createdAt": "2025-09016",
+    "updateIdent": 0
+  },
+  {
+    "id": 2,
+    "description": "Testing 2",
+    "imageIds": "[ 1, 2, 3, 4, 5 ]",
+    "updatedAt": null,
+    "createdAt": "2025-09016",
+    "updateIdent": 0
+  },
+  {
+    "id": 3,
+    "description": "Testing 3",
+    "imageIds": "[ 1, 2, 3, 1, 2 ]",
+    "updatedAt": null,
+    "createdAt": "2025-09016",
+    "updateIdent": 0
+  }
+];

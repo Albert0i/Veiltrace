@@ -327,6 +327,107 @@ router.get('/status', async (req, res) => {
                       } );
 });
 
+// GET http://localhost:3000/api/v1/image/archive
+router.get('/archive', async (req, res) => {
+  const result = await prisma.archivetrace.findMany({
+    orderBy: { description: 'asc' }
+  });
+  
+  res.status(200).json( result );
+});
+
+// POST http://localhost:3000/api/v1/image/archive
+router.post('/archive', async (req, res) => {
+  // Current timestamp 
+  const createdAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  const description = req.body.description || `Archive ${createdAt.toISOString()}`;
+
+  try {
+    const result = await prisma.archivetrace.create({
+      data: {
+        imageIds: JSON.stringify([]),
+        description,
+        createdAt: createdAt.toISOString(),
+      }
+    });
+
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Error creating archive:', error);
+    res.status(500).json({ message: 'Failed to create archive' });
+  }
+});
+
+// PUT http://localhost:3000/api/v1/image/archive
+router.put('/archive/:id', async (req, res) => {
+  const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  const id = parseInt(req.params.id, 10);
+  const { action, ids }  = req.body;
+
+  if (isNaN(id)) {
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` });
+  }
+
+  let { imageIds } = await prisma.archivetrace.findUnique({
+    where: { id },
+    select: { imageIds: true }
+  });
+  imageIds = JSON.parse(imageIds)
+
+  let newImageIds = [];
+  switch (action) {
+    case "add":
+      newImageIds = MergeArray(imageIds, ids);
+      break;
+    case "remove":
+      newImageIds = subtractArray(imageIds, ids);
+      break;
+    default:
+      return res.status(400).json({ message: `Invalid action '${action}'` });
+  }
+
+  const result = await prisma.archivetrace.update({
+    where: { id },
+    data: {
+      imageIds: JSON.stringify(newImageIds),
+      updatedAt: updatedAt.toISOString(),
+      updateIdent: { increment: 1 }
+    }
+  });
+
+  res.status(200).json(result);
+});
+
+// DELETE http://localhost:3000/api/v1/image/archive
+router.delete('/archive/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (isNaN(id)) {
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` });
+  }
+
+  try {
+    const result = await prisma.archivetrace.delete({
+      where: { id }
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Delete failed:', error);
+    res.status(404).json({ message: `ArchiveTrace with id '${id}' not found.` });
+  }
+});
+
+function MergeArray(arr1, arr2) {
+  return [...new Set([...arr1, ...arr2])];
+}
+
+function subtractArray(base = [], toRemove = []) {
+  const removeSet = new Set(toRemove || []);
+  return Array.isArray(base) ? base.filter(x => !removeSet.has(x)) : [];
+}
+
+
 async function updateVeilTrace(id, type) {
   // Current timestamp 
   const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
