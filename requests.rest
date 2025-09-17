@@ -8,16 +8,17 @@ POST http://localhost:3000/api/v1/image/archive
 Content-Type: application/json
 
 {
-  "description": "Stars, staring and shinning on us over centries, can only be seen in dark nights."
+  "description": "Stars, staring and shinning on us over centries, can only be seen in dark nights.",
+  "ids": [4, 5, 6]
 }
 
 ### Update an archive
-PUT http://localhost:3000/api/v1/image/archive/21
+PUT http://localhost:3000/api/v1/image/archive/31
 Content-Type: application/json
 
 {
   "action": "remove", 
-  "ids": [ 3, 5 ]
+  "ids": [ 2, 4, 8, 16 ]
 }
 
 ### Delete an archive
