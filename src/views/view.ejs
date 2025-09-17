@@ -53,7 +53,7 @@
   
         <!-- Vistas -->
         <section class="bg-white rounded-lg shadow p-2 space-y-1 text-sm">
-          <h2 class="text-lg font-semibold text-black mb-2">Vista Details</h2>
+          <h2 class="text-lg font-semibold text-black mb-2">Vista Trace</h2>
 
           <ul class="list-none space-y-1 text-sm text-gray-900">
             <% vistas.forEach((vista, index) => { %>
@@ -67,6 +67,23 @@
           </ul>
         </section>
   
+        <!-- Archives -->
+        <section class="bg-white rounded-lg shadow p-2 space-y-1 text-sm">
+          <h2 class="text-lg font-semibold text-black mb-2">Archive Trace</h2>
+
+          <ul class="list-none space-y-1 text-sm text-gray-900">
+            <% archives.forEach((archive, index) => { %>
+              <li>
+                <strong><%= index + 1 %></strong> .
+                <a href="/archive/<%= archive.id %>" target="_blank"
+                   class="text-blue-600 underline hover:text-blue-800 transition">
+                  <%= archive.description %> — <%= archive.createdAt %>
+                </a>
+              </li>
+            <% }) %>
+          </ul>
+        </section>
+
       </main>
     </div>
 

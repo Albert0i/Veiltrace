@@ -48,16 +48,21 @@ router.get('/view/:id', async (req, res) => {
 
   let data = []
   let vistas = []
+  let archives = []
 
   const r1 = fetch(`http://${HOST}:${PORT}/api/v1/image/info/${id}`)
   const r2 = fetch(`http://${HOST}:${PORT}/api/v1/image/vista/${id}`)
+  const r3 = fetch(`http://${HOST}:${PORT}/api/v1/image/archives-by-image/${id}`)
 
-  const [ response1, response2 ] = await Promise.all([ r1, r2 ])
+  const [ response1, response2, response3 ] = await Promise.all([ r1, r2, r3 ])
 
   if (!response1.ok) {
     throw new Error(`HTTP error: ${response1.status}`);
   }
   if (!response2.ok) {
+    throw new Error(`HTTP error: ${response2.status}`);
+  }
+  if (!response3.ok) {
     throw new Error(`HTTP error: ${response2.status}`);
   }
 
@@ -87,7 +92,20 @@ router.get('/view/:id', async (req, res) => {
     throw new Error('Invalid JSON: ' + err.message);
   }
 
-  res.render('view', {id, ...data, vistas });
+  // Archive Trace 
+  const text3 = await response3.text();
+  if (!text3) {
+    //throw new Error('Empty response body');
+    console.log('Empty response body')  
+    return data
+  }
+  try {
+    archives = JSON.parse(text3);
+  } catch (err) {
+    throw new Error('Invalid JSON: ' + err.message);
+  }
+
+  res.render('view', {id, ...data, vistas, archives });
 });
 
 // GET http://localhost:3000/info

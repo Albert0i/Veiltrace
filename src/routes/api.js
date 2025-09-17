@@ -350,7 +350,8 @@ router.get('/archives-by-image/:id', async (req, res) => {
   try {
     const result = await prisma.$queryRaw`
       SELECT * FROM archivetrace
-      WHERE JSON_CONTAINS(imageIds, ${JSON.stringify([id])});`;
+      WHERE JSON_CONTAINS(imageIds, ${JSON.stringify([id])})
+      ORDER BY description;`;
 
     res.status(200).json(result);
   } catch (err) {
