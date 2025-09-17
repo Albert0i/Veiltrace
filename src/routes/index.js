@@ -210,15 +210,13 @@ router.get('/archive/:id', async (req, res) => {
     } catch (err) {
       throw new Error('Invalid JSON: ' + err.message);
     }    
-    // console.log('Search results:', data);
-    //return data
+
     res.status(200).json(data)
   } catch (error) {
     console.error('Search error:', error);
     console.log('searchUrl =', searchUrl)
     return null; 
   }
-  //res.status(200).json({ id })
 })  
 
 
