@@ -66,7 +66,7 @@ router.get('/view/:id', async (req, res) => {
     throw new Error(`HTTP error: ${response2.status}`);
   }
 
-  // ImageTrace 
+  // Image Trace 
   const text1 = await response1.text();
   if (!text1) {
     //throw new Error('Empty response body');
@@ -79,7 +79,7 @@ router.get('/view/:id', async (req, res) => {
     throw new Error('Invalid JSON: ' + err.message);
   }
 
-  // VistaTrace 
+  // Vista Trace 
   const text2 = await response2.text();
   if (!text2) {
     //throw new Error('Empty response body');

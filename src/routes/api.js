@@ -311,12 +311,14 @@ router.get('/status', async (req, res) => {
                   visited: { gt: 0 }
                 }
               })
+  const r6 = prisma.archivetrace.count();
 
   const [[{ version }],
             numImages, 
             numVistas, 
          [{ _, size }], 
-            visited ] = await Promise.all([r1, r2, r3, r4, r5]) 
+            visited, 
+            numArchives ] = await Promise.all([r1, r2, r3, r4, r5, r6]) 
 
   res.status(200).json( { 
                           version,
@@ -324,6 +326,7 @@ router.get('/status', async (req, res) => {
                           numVistas, 
                           size, 
                           visited, 
+                          numArchives
                       } );
 });
 
