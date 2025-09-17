@@ -327,13 +327,33 @@ router.get('/status', async (req, res) => {
                       } );
 });
 
-// GET http://localhost:3000/api/v1/image/archive
-router.get('/archive', async (req, res) => {
+// GET http://localhost:3000/api/v1/image/archives
+router.get('/archives', async (req, res) => {
   const result = await prisma.archivetrace.findMany({
     orderBy: { description: 'asc' }
   });
   
   res.status(200).json( result );
+});
+
+// GET http://localhost:3000/api/v1/image/archive/:id
+router.get('/archive/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (isNaN(id)) {
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` });
+  }
+
+  try {
+    const result = await prisma.archivetrace.findUnique({ where: { id } });
+    if (!result) {
+      return res.status(404).json({ message: `Archive '${id}' not found` });
+    }
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // POST http://localhost:3000/api/v1/image/archive
@@ -345,13 +365,17 @@ router.post('/archive', async (req, res) => {
 
   console.log('ids = ', ids)
   try {
-    const result = await prisma.archivetrace.create({
+    let result = await prisma.archivetrace.create({
       data: {
         imageIds: JSON.stringify([]),
         description,
         createdAt: createdAt.toISOString(),
       }
     });
+
+    if (ids && ids.length > 0) {
+      result = await updateArchive(result.id, "add", ids)
+    }
 
     res.status(201).json(result);
   } catch (error) {
@@ -362,7 +386,7 @@ router.post('/archive', async (req, res) => {
 
 // PUT http://localhost:3000/api/v1/image/archive
 router.put('/archive/:id', async (req, res) => {
-  const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  //const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
   const id = parseInt(req.params.id, 10);
   const { action, ids }  = req.body;
 
@@ -370,33 +394,8 @@ router.put('/archive/:id', async (req, res) => {
     return res.status(400).json({ message: `Invalid id '${req.params.id}'` });
   }
 
-  let { imageIds } = await prisma.archivetrace.findUnique({
-    where: { id },
-    select: { imageIds: true }
-  });
-  imageIds = JSON.parse(imageIds)
-
-  let newImageIds = [];
-  switch (action) {
-    case "add":
-      newImageIds = MergeArray(imageIds, ids);
-      break;
-    case "remove":
-      newImageIds = subtractArray(imageIds, ids);
-      break;
-    default:
-      return res.status(400).json({ message: `Invalid action '${action}'` });
-  }
-
-  const result = await prisma.archivetrace.update({
-    where: { id },
-    data: {
-      imageIds: JSON.stringify(newImageIds),
-      updatedAt: updatedAt.toISOString(),
-      updateIdent: { increment: 1 }
-    }
-  });
-
+  const result = await updateArchive(id, action, ids)
+  
   res.status(200).json(result);
 });
 
@@ -420,6 +419,41 @@ router.delete('/archive/:id', async (req, res) => {
   }
 });
 
+async function updateArchive(id, action, ids) {
+  const updatedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  let { imageIds } = await prisma.archivetrace.findUnique({
+    where: { id },
+    select: { imageIds: true }
+  });
+  if ( imageIds && imageIds !== "" )
+    imageIds = JSON.parse(imageIds)
+  else 
+    imageIds = []
+
+  let newImageIds = [];
+  switch (action) {
+    case "add":
+      newImageIds = MergeArray(imageIds, ids);
+      break;
+    case "remove":
+      newImageIds = subtractArray(imageIds, ids);
+      break;
+    default:
+      return { message: `Invalid action '${action}'` }
+  }
+
+  const result = await prisma.archivetrace.update({
+    where: { id },
+    data: {
+      imageIds: JSON.stringify(newImageIds),
+      updatedAt: updatedAt.toISOString(),
+      updateIdent: { increment: 1 }
+    }
+  });
+
+  return result
+}
+
 function MergeArray(arr1, arr2) {
   return [...new Set([...arr1, ...arr2])];
 }
@@ -428,6 +462,8 @@ function subtractArray(base = [], toRemove = []) {
   const removeSet = new Set(toRemove || []);
   return Array.isArray(base) ? base.filter(x => !removeSet.has(x)) : [];
 }
+
+
 
 
 async function updateVeilTrace(id, type) {

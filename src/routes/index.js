@@ -177,7 +177,7 @@ router.post('/archive', async (req, res) => {
     selected = [] 
   else if (typeof selected !== 'object') 
     { selected = [ selected ]; } 
-  console.log('selected =', selected)
+  console.log('selected =', selected, typeof selected)
 
 
   //res.status(200).json( selected )
@@ -237,8 +237,8 @@ async function fetchSearchResults(query, stype, mode, expansion, limit) {
 }
 
 async function fetchArchives() {
-  try {    
-    const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/archive`)
+  try {
+    const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/archives`)
 
     if (!response.ok) {
       throw new Error(`HTTP error: ${response1.status}`);

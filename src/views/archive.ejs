@@ -2,14 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Veiltrace Archive</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <script src="/assets/tailwind.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-800">
-  <div class="max-w-3xl mx-auto py-10 px-6">
-    <h1 class="text-3xl font-semibold mb-6 text-indigo-700">📜 Archive List</h1>
+<body class="bg-gray-50 text-gray-900">
 
-    <!-- 🧾 New Archive Form -->
+  <div class="max-w-7xl mx-auto pt-6 pb-2 px-6">
+    <!-- Header -->
+    <header class="mb-4 text-center">
+      <h1 class="text-3xl font-serif font-semibold tracking-tight">Veiltrace Archive</h1>
+    </header>
+
+    <!-- Add to New Archive Form -->
     <% if (ids && ids.length > 0 ) { %> 
       <form id="archiveForm" method="post" action="/api/v1/image/archive" class="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>      
@@ -24,90 +30,106 @@
     <% } %>
 
 
-    <!-- 🧾 Archive List -->
+    <!-- Archive List -->
     <ol class="space-y-6 list-none">
       <% archives.forEach((item, index) => { %>
-        <li class="flex items-start space-x-4">
-          <!-- Left Column: Number + Button -->
+
+        <li class="flex items-center space-x-4">
+          <!-- Left Column: Number + Add Button -->
           <div class="flex flex-col items-center w-16 flex-shrink-0">
-            <div class="text-xl font-bold text-indigo-700 mb-2">
+            <div class="text-md font-bold text-gray-700 mb-2">
               <%= index + 1 %>.
             </div>
+
             <% if (ids && ids.length > 0 ) { %> 
-              <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded shadow-sm text-sm" onclick="addToArchive('<%= item.id %>')">
-                Add Here
+              <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded shadow-sm text-sm"
+              onclick="addToArchive('<%= item.id %>')">
+                Add to<br />Archive
               </button>
             <% } %>
           </div>
-
-          <!-- Right Column: Archive Block -->
-          <a href="/archivedetails/<%= item.id %>" class="flex-1 block bg-white shadow-sm hover:shadow-md transition rounded-lg p-4 border border-gray-200 hover:border-indigo-300">
-            <div class="text-lg font-bold text-indigo-600 mb-1">
-              <%= item.description %>
-            </div>
-            <div class="text-sm text-gray-600">
-              🕰️ Created: <%= item.createdAt %>
-              <% if (item.updatedAt) { %>
-                | 🔄 Updated: <%= item.updatedAt %>
-              <% } %>
-              | 🔢 Update Ident: <%= item.updateIdent %>
-            </div>
-            <div class="mt-2 text-sm text-gray-700">
-              🖼️ Image IDs:
-              <% try { %>
-                <% const imageArray = JSON.parse(item.imageIds); %>
-                <% if (imageArray.length === 0) { %>
-                  <span class="text-gray-400 italic">No images</span>
-                <% } else { %>
-                  <% imageArray.forEach(id => { %>
-                    <span class="inline-block bg-indigo-100 text-indigo-800 px-2 py-1 rounded mr-1 mb-1"><%= id %></span>
-                  <% }) %>
+        
+          <!-- Archive Block -->
+          <div class="flex flex-1 items-center justify-between bg-white shadow-sm hover:shadow-md transition rounded-lg p-4 border border-gray-200 hover:border-indigo-300">
+            <!-- Archive Content -->
+            <a href="/archivedetails/<%= item.id %>" class="block flex-grow">
+              <div class="text-lg font-bold text-black mb-1">
+                <%= item.description %>
+              </div>
+              <div class="text-sm text-gray-900 semi-bold">
+                <p><strong>Created at</strong>: <%= item.createdAt %></p>
+                <% if (item.updatedAt) { %>
+                  <p><strong>Updated at</strong>: <%= item.updatedAt %></p>
                 <% } %>
-              <% } catch (e) { %>
-                <span class="text-red-500">Invalid imageIds</span>
-              <% } %>
-            </div>
-          </a>
+                <p><strong>Number of updates</strong>: <%= item.updateIdent %></p>
+                <p><strong>Number of images</strong>: <%= JSON.parse(item.imageIds).length %></p>
+              </div>
+            </a>
+        
+            <% if (!(ids && ids.length > 0 )) { %> 
+              <!-- Right Column: Delete Button -->
+              <div class="flex flex-col items-center w-32 flex-shrink-0">
+                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded shadow-sm text-sm"
+                        onclick="deleteArchive('<%= item.id %>')">
+                  Delete<br />Archive
+                </button>
+              </div>
+            <% } %>
+          </div>
         </li>
+
       <% }) %>
     </ol>
+
+    <div class="flex justify-center items-center h-32">
+      <button onclick="window.history.back()"
+              class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded shadow-sm transition">
+        ← Back
+      </button>
+    </div>
+
   </div>
 
   <!-- 🧠 Script -->
   <script>
-    const ids = '<%- JSON.stringify(ids) %>';
-    console.log('ids = ', ids)
+    const rawIds = '<%- JSON.stringify(ids) %>';
+    const ids = JSON.parse(rawIds).map(id => Number(id))
+    console.log('ids = ', ids, typeof ids)
+    
+    if (ids && ids.length > 0) {
+        // Add to New Archive
+        document.getElementById('archiveForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const description = document.getElementById('description').value;
 
-    document.getElementById('archiveForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const description = document.getElementById('description').value;
+        try {
+          const response = await fetch('/api/v1/image/archive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description, ids })
+          });
 
-      try {
-        const response = await fetch('/api/v1/image/archive', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description, ids })
-        });
-
-        if (response.ok) {
-          // alert('New archive created successfully.');
-          location.reload();
-        } else {
-          const error = await response.json();
-          alert(`Failed: ${error.message}`);
+          if (response.ok) {
+            // alert('New archive created successfully.');
+            location.reload();
+          } else {
+            const error = await response.json();
+            alert(`Failed: ${error.message}`);
+          }
+        } catch (err) {
+          console.error('Error:', err);
+          alert('Request failed.');
         }
-      } catch (err) {
-        console.error('Error:', err);
-        alert('Request failed.');
-      }
-    });
-
+      });
+    }  
+    
+    // Add to Archive
     async function addToArchive(archiveId) {
       try {
         const response = await fetch(`/api/v1/image/archive/${archiveId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ids })
+          body: JSON.stringify({ action: "add", ids })
         });
 
         if (response.ok) {
@@ -122,6 +144,29 @@
         alert('Request failed.');
       }
     }
+
+    // Delete Archive
+    async function deleteArchive(archiveId) {
+      if (!confirm(`Are you sure you want to delete archive '${archiveId}'?`)) return;
+
+      try {
+        const response = await fetch(`/api/v1/image/archive/${archiveId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          alert(`Archive ${archiveId} deleted.`);
+          location.reload();
+        } else {
+          const error = await response.json();
+          alert(`Failed: ${error.message}`);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Request failed.');
+      }
+    }
+    
   </script>
 </body>
 </html>
