@@ -26,10 +26,6 @@
                class="flex overflow-x-auto space-x-4 p-2 border border-gray-200 rounded bg-white scroll-smooth">
             <% ids.forEach(id => { %>
               
-              <!-- <img src="/api/v1/image/preview/<%= id %>"
-                   alt="Preview <%= id %>"
-                   onclick="window.open('/view/<%= id %>', '_blank')"
-                   class="h-40 object-contain border-4 border-white rounded shadow transition duration-300 ease-in-out flex-shrink-0" /> -->
               <img src="/api/v1/image/preview/<%= id %>"
                    alt="Preview <%= id %>"
                    onclick="window.open('/view/<%= id %>', '_blank')"
@@ -49,7 +45,7 @@
           </button>
         </div>
 
-        <form id="archiveForm" method="post" action="/api/v1/image/archive" >
+        <form id="archiveForm" >
           <label for="description" class="block text-sm font-medium text-gray-900 mb-2">Description</label>
 
           <input type="text" id="description" name="description" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
@@ -117,20 +113,24 @@
     </ol>
 
     <div class="flex justify-center items-center h-12">
-      <a href="/" class="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+      <!-- <a href="/" class="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
         Back to Main
-      </a>
+      </a> -->
+      <button onclick="window.history.back()"
+              class="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition cursor-pointer">
+        Back to Main
+      </button>
     </div>
 
-        <!-- Copilot Credit -->
-        <footer class="m-4 text-center text-sm text-gray-700">
-          <p>
-          Crafted in quiet partnership with  
-          <a href="https://copilot.microsoft.com" target="_blank" class="text-blue-600 font-semibold hover:underline">
-              Microsoft Copilot
-          </a> — <br />your poetic companion in code, ritual, and breath. Veiltrace. All traces remembered.
-          </p>
-      </footer>
+      <!-- Copilot Credit -->
+      <footer class="m-4 text-center text-sm text-gray-700">
+        <p>
+        Crafted in quiet partnership with  
+        <a href="https://copilot.microsoft.com" target="_blank" class="text-blue-600 font-semibold hover:underline">
+            Microsoft Copilot
+        </a> — <br />your poetic companion in code, ritual, and breath. Veiltrace. All traces remembered.
+        </p>
+    </footer>
 
   </div>
 

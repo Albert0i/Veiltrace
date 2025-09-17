@@ -327,6 +327,9 @@ router.get('/status', async (req, res) => {
                       } );
 });
 
+
+
+
 // GET http://localhost:3000/api/v1/image/archives
 router.get('/archives', async (req, res) => {
   const result = await prisma.archivetrace.findMany({
@@ -334,6 +337,26 @@ router.get('/archives', async (req, res) => {
   });
   
   res.status(200).json( result );
+});
+
+// GET http://localhost:3000/api/v1/image/archives-by-image
+router.get('/archives-by-image/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (isNaN(id)) {
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` });
+  }
+
+  try {
+    const result = await prisma.$queryRaw`
+      SELECT * FROM archivetrace
+      WHERE JSON_CONTAINS(imageIds, ${JSON.stringify([id])});`;
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // GET http://localhost:3000/api/v1/image/archive/:id
@@ -363,7 +386,7 @@ router.post('/archive', async (req, res) => {
   const description = req.body.description || `Archive ${createdAt.toISOString()}`;
   const ids = req.body.ids
 
-  console.log('ids = ', ids)
+  //console.log('ids = ', ids)
   try {
     let result = await prisma.archivetrace.create({
       data: {
