@@ -17,15 +17,42 @@
 
     <!-- Add to New Archive Form -->
     <% if (ids && ids.length > 0 ) { %> 
-      <form id="archiveForm" method="post" action="/api/v1/image/archive" class="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>      
-        <input type="text" id="description" name="description" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
-          placeholder="Enter a poetic description..." autofocus required />
+      <div class="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <span class="block text-sm font-medium text-gray-900 mb-2">You have selected <%= ids.length %> image<%= ids.length > 1 ? "s" : "" %></span>
 
-        <button type="submit" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow-sm">
-          Add to New Archive
-        </button>
-      </form>
+        <div class="relative w-full max-w-5xl mx-auto mb-6">
+          <!-- Scrollable Image Strip -->
+          <div id="imageStrip"
+               class="flex overflow-x-auto space-x-4 p-2 border border-gray-200 rounded bg-white scroll-smooth">
+            <% ids.forEach(id => { %>
+              <img src="/api/v1/image/preview/<%= id %>"
+                   alt="Preview <%= id %>"
+                   class="h-40 object-contain border-4 border-white rounded shadow transition duration-300 ease-in-out flex-shrink-0" />
+            <% }) %>
+          </div>
+        
+          <!-- Navigation Buttons -->
+          <button onclick="scrollBannerLeft()"
+                  class="absolute left-0 top-1/2 transform -translate-y-1/2 px-3 py-2 bg-white text-gray-900 rounded-l shadow hover:bg-gray-100">
+            &lt;
+          </button>
+          <button onclick="scrollBannerRight()"
+                  class="absolute right-0 top-1/2 transform -translate-y-1/2 px-3 py-2 bg-white text-gray-900 rounded-r shadow hover:bg-gray-100">
+            &gt;
+          </button>
+        </div>
+
+        <form id="archiveForm" method="post" action="/api/v1/image/archive" >
+          <label for="description" class="block text-sm font-medium text-gray-900 mb-2">Description</label>
+
+          <input type="text" id="description" name="description" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+            placeholder="Enter a poetic description..." autofocus required />
+  
+          <button type="submit" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow-sm">
+            Add to New Archive
+          </button>
+        </form>
+      </div>
       <hr />
     <% } %>
 
@@ -52,7 +79,7 @@
           <!-- Archive Block -->
           <div class="flex flex-1 items-center justify-between bg-white shadow-sm hover:shadow-md transition rounded-lg p-4 border border-gray-200 hover:border-indigo-300">
             <!-- Archive Content -->
-            <a href="/archivedetails/<%= item.id %>" class="block flex-grow">
+            <a href="/archive/<%= item.id %>" class="block flex-grow">
               <div class="text-lg font-bold text-black mb-1">
                 <%= item.description %>
               </div>
@@ -60,7 +87,7 @@
                 <p><strong>Created at</strong>: <%= item.createdAt %></p>
                 <% if (item.updatedAt) { %>
                   <p><strong>Updated at</strong>: <%= item.updatedAt %></p>
-                <% } %>
+                <% } %>                
                 <p><strong>Number of updates</strong>: <%= item.updateIdent %></p>
                 <p><strong>Number of images</strong>: <%= JSON.parse(item.imageIds).length %></p>
               </div>
@@ -168,5 +195,41 @@
     }
     
   </script>
+
+  <script>
+    const strip = document.getElementById('imageStrip');
+
+    function scrollBannerLeft() {
+      strip.scrollBy({ left: -300, behavior: 'smooth' }); // ✅ scrolls left
+    }
+
+    function scrollBannerRight() {
+      strip.scrollBy({ left: 300, behavior: 'smooth' }); // ✅ scrolls right
+    }
+
+    // Optional: Hide arrows if no overflow
+    function updateArrowVisibility() {
+      const leftBtn = document.querySelector('button[onclick="scrollBannerLeft()"]');
+      const rightBtn = document.querySelector('button[onclick="scrollBannerRight()"]');
+
+      if (!leftBtn || !rightBtn || !strip) return; // ✅ Prevents error
+
+      const isOverflowing = strip.scrollWidth > strip.clientWidth;
+      leftBtn.style.display = isOverflowing ? 'block' : 'none';
+      rightBtn.style.display = isOverflowing ? 'block' : 'none';
+    }
+    // function updateArrowVisibility() {
+    //   const leftBtn = document.querySelector('button[onclick="scrollLeft()"]');
+    //   const rightBtn = document.querySelector('button[onclick="scrollRight()"]');
+
+    //   const isOverflowing = strip.scrollWidth > strip.clientWidth;
+    //   leftBtn.style.display = isOverflowing ? 'block' : 'none';
+    //   rightBtn.style.display = isOverflowing ? 'block' : 'none';
+    // }
+
+    window.addEventListener('load', updateArrowVisibility);
+    window.addEventListener('resize', updateArrowVisibility);
+  </script>
+
 </body>
 </html>

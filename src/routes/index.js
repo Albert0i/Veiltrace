@@ -177,12 +177,50 @@ router.post('/archive', async (req, res) => {
     selected = [] 
   else if (typeof selected !== 'object') 
     { selected = [ selected ]; } 
-  console.log('selected =', selected, typeof selected)
+  //console.log('selected =', selected, typeof selected)
 
-
-  //res.status(200).json( selected )
   res.render('archive', { archives: await fetchArchives(), ids: selected });
 })  
+
+// GET http://localhost:3000/archive/:id
+router.get('/archive/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  
+  if (isNaN(id)) 
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` })
+
+  try {
+    const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/archive/${id}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+  
+    const text = await response.text();
+    let data = []
+    
+    if (!text) {
+      //throw new Error('Empty response body');
+      // console.log(`Empty response body for ${params.get('stype')} query '${query}'`)
+      return data; 
+    }
+    
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      throw new Error('Invalid JSON: ' + err.message);
+    }    
+    // console.log('Search results:', data);
+    //return data
+    res.status(200).json(data)
+  } catch (error) {
+    console.error('Search error:', error);
+    console.log('searchUrl =', searchUrl)
+    return null; 
+  }
+  //res.status(200).json({ id })
+})  
+
 
 
 async function fetchSearchResults(query, stype, mode, expansion, limit) {
