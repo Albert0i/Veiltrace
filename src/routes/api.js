@@ -420,7 +420,7 @@ router.put('/archive/:id', async (req, res) => {
   if (isNaN(id)) {
     return res.status(400).json({ message: `Invalid id '${req.params.id}'` });
   }
-
+  //console.log('id =', id, ", action =", action, ", ids=", ids)
   const result = await updateArchive(id, action, ids)
   
   res.status(200).json(result);

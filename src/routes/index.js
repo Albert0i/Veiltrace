@@ -229,7 +229,9 @@ router.get('/archive/:id', async (req, res) => {
       throw new Error('Invalid JSON: ' + err.message);
     }    
 
-    res.status(200).json(data)
+    data.imageIds = JSON.parse(data.imageIds)
+    //console.log('data =', data)
+    res.render('archiveDetail', data )
   } catch (error) {
     console.error('Search error:', error);
     console.log('searchUrl =', searchUrl)
