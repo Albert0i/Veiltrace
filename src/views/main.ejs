@@ -126,16 +126,22 @@
                 class="px-6 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">
           Archive
         </button> -->
-        <div class="flex justify-between items-center mb-6">
-          <!-- Left: Search Button -->
-          <button type="submit"
-                  class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            Search
-          </button>
+        <div class="flex items-center justify-between mt-4">
+          <!-- Left: Search + Reset -->
+          <div class="flex space-x-4">
+            <button type="submit"
+                    class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+              Search
+            </button>
         
-          <!-- Right: Archive Button -->
-          <button type="submit"
-                  formaction="/archive" formnovalidate
+            <button type="reset" onclick="window.location.href='/'"
+                    class="px-6 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">
+              Reset
+            </button>
+          </div>
+        
+          <!-- Right: Archive -->
+          <button type="submit" formaction="/archive" formnovalidate
                   class="mr-7 px-6 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">
             Archives
           </button>
