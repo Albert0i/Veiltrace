@@ -16,6 +16,7 @@ router.get('/', async (req, res) => {
     stype: "text-scan", 
     mode: "natural", 
     expansion: false, 
+    useImageId: false, 
     limit: 100, 
     results: null
   });
@@ -23,17 +24,18 @@ router.get('/', async (req, res) => {
 
 // POST http://localhost:3000/
 router.post('/', async (req, res) => {
-  const { query, stype, mode, expansion, limit } = req.body;
+  const { query, stype, mode, expansion, useImageId, limit } = req.body;
 
   //console.log('query =', query, ", stype =", stype, ", mode =", mode, ", expansion =", expansion, ", limit =", limit)
 
-  const results = await fetchSearchResults(query, stype, mode, expansion, limit )
+  const results = await fetchSearchResults(query, stype, mode, expansion, useImageId, limit )
   
   res.render('main', { 
     query,
     stype, 
     mode, 
     expansion, 
+    useImageId, 
     limit, 
     results
   });
@@ -241,11 +243,12 @@ router.get('/archive/:id', async (req, res) => {
 
 
 
-async function fetchSearchResults(query, stype, mode, expansion, limit) {
+async function fetchSearchResults(query, stype, mode, expansion, useImageId, limit) {
   const params = new URLSearchParams({
     query: encodeURIComponent(query),
     stype, 
     mode,
+    useImageId: useImageId ? true : false, 
     expansion: expansion ? true : false, 
     limit
   });

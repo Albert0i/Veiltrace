@@ -257,13 +257,13 @@ router.get('/searchft', async (req, res) => {
 
   const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
   const result = await prisma.$queryRawUnsafe(`
-        SELECT  id, visited, updatedAt, 
-                MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
-        FROM imagetrace
-        WHERE MATCH(description) AGAINST(? ${modifier})
-        ORDER BY relevance DESC
-        LIMIT ? OFFSET ?;
-      `, query, query, limit, offset);
+                          SELECT  id, visited, updatedAt, 
+                                  MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
+                          FROM imagetrace
+                          WHERE MATCH(description) AGAINST(? ${modifier})
+                          ORDER BY relevance DESC
+                          LIMIT ? OFFSET ?;
+                        `, query, query, limit, offset);
 
   res.status(result.length>0?200:204).json(result);
 });
@@ -273,25 +273,46 @@ router.get('/searchse', async (req, res) => {
   const query = req.query.query?.trim();
   const offset = parseInt(req.query.offset) || 0;
   const limit = parseInt(req.query.limit) || 20;
+  const useImageId = req.query.useImageId === 'true'; // ← default is false
   
-  //console.log('semantic >> query =', query, ", offset =", offset, ", limit =", limit)
+  //console.log('semantic >> query =', query, ", useImageId =", useImageId, ", offset =", offset, ", limit =", limit)
 
   if (!query) return res.status(400).json({ message: 'Missing search query' });
 
-  const { vector } = await context.getEmbeddingFor(query);
+    // Find similar documents 
+  let result = []
+  if (useImageId) {
+    const imageId = parseInt(query, 10); // base 10
 
-  // Find similar documents 
-  const result = await prisma.$queryRaw`
-                        SELECT id, visited, updatedAt,
-                               VEC_DISTANCE_COSINE(
-                                  embedding,
-                                  VEC_FromText(${JSON.stringify(vector)})
-                                  ) AS distance, 
-                               id
-                        FROM imagetrace 
-                        ORDER BY 4 ASC
-                        LIMIT ${limit} OFFSET ${offset};
-                      `; 
+    if (isNaN(imageId)) {
+      return res.status(400).json({ message: `Invalid imageId '${imagdId}'` });      
+    }
+    //console.log('imageId =', imageId)
+    result = await prisma.$queryRaw`
+                      SELECT id, visited, updatedAt,
+                             VEC_DISTANCE_COSINE(
+                                embedding,
+                                (SELECT embedding from imagetrace WHERE id=${imageId})
+                              ) AS distance, 
+                             id
+                      FROM imagetrace 
+                      ORDER BY 4 ASC
+                      LIMIT ${limit} OFFSET ${offset};
+                    `; 
+  } else {
+    const { vector } = await context.getEmbeddingFor(query);
+    //console.log('vector =', vector)
+    result = await prisma.$queryRaw`
+                      SELECT id, visited, updatedAt,
+                            VEC_DISTANCE_COSINE(
+                                embedding,
+                                VEC_FromText(${JSON.stringify(vector)})
+                            ) AS distance
+                      FROM imagetrace 
+                      ORDER BY 4 ASC
+                      LIMIT ${limit} OFFSET ${offset};
+                    `; 
+  }
 
   res.status(result.length>0?200:204).json(result);
 });

@@ -110,10 +110,24 @@
               </label>
             </div>
 
-            <label>
+            <!-- <label>
               <input type="radio" name="stype" value="semantic" <%= stype === 'semantic' ? 'checked' : '' %>>
               Semantic Search
-            </label>
+            </label> -->
+            <div class="flex items-center space-x-6 mt-2">
+              <!-- Semantic Search Radio -->
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="stype" value="semantic" <%= stype === 'semantic' ? 'checked' : '' %>>
+                <span>Semantic Search</span>
+              </label>
+            
+              <!-- Using imageId Checkbox -->
+              <label class="flex items-center space-x-2">
+                <input type="checkbox" name="useImageId" value="true" <%= useImageId ? 'checked' : '' %>>
+                <span>Use <bold>imageId</bold> (<em>experimental</em>)</span>
+              </label>
+            </div>
+
           </div>
 
         </div>
@@ -209,7 +223,7 @@
               </div>
 
               <!-- Image Preview -->
-              <a href="/view/<%= item.id %>" target="_blank">
+              <a href="/view/<%= item.id %>" target="_blank" title="ImageId is <%= item.id %>">
                 <img src="/api/v1/image/preview/<%= item.id %>"
                      alt="Preview <%= item.id %>"
                      class="w-full h-32 object-cover rounded mt-2">
