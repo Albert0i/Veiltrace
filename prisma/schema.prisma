@@ -46,6 +46,7 @@ model vistatrace {
 model archivetrace {
   id          Int     @id @default(autoincrement())
   avatarId    Int     @default(0)
+  title       String
   description String?
   imageIds    String? @db.LongText
   updatedAt   String?

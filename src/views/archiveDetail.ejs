@@ -152,33 +152,36 @@
 
       console.log('archiveId = ', archiveId)
       console.log('ids-', ids)
-      if (!confirm(`Are you sure you want to remove '[${ids}]' from archive '${archiveId}'?`)) return;
 
-      const payload = {
-        action: 'remove', 
-        ids
-      };
+      if (ids.length > 0) {
+        if (!confirm(`Are you sure you want to remove '[${ids}]' from archive '${archiveId}'?`)) return;
 
-      fetch(`/api/v1/image/archive/${archiveId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(response => {
-        if (response.ok) {
-          //alert('Image removed from archive.');
-          // Optionally refresh or redirect
-          location.reload();
-        } else {
-          alert('Failed to remove image.');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred.');
-      });
+        const payload = {
+          action: 'remove', 
+          ids
+        };
+
+        fetch(`/api/v1/image/archive/${archiveId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(response => {
+          if (response.ok) {
+            //alert('Image removed from archive.');
+            // Optionally refresh or redirect
+            location.reload();
+          } else {
+            alert('Failed to remove image.');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred.');
+        });
+      }
     }
   </script>
 </body>

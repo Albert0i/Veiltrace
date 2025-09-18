@@ -407,8 +407,9 @@ router.get('/archive/:id', async (req, res) => {
 // POST http://localhost:3000/api/v1/image/archive
 router.post('/archive', async (req, res) => {
   // Current timestamp 
-  const createdAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-  const description = req.body.description || `Archive ${createdAt.toISOString()}`;
+  const createdAt = new Date(Date.now() + 8 * 60 * 60 * 1000);  
+  const title = req.body.title || `Archive ${createdAt.toISOString()}`;
+  const description = req.body.description;
   const ids = req.body.ids
   const avatarId = Number(req.body.avatarId) || Number(ids[0])
 
@@ -418,6 +419,7 @@ router.post('/archive', async (req, res) => {
       data: {
         imageIds: JSON.stringify([]),
         avatarId, 
+        title, 
         description,
         createdAt: createdAt.toISOString(),
       }
