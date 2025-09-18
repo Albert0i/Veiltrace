@@ -1,51 +1,69 @@
-### ⚙️ **Quick Start: Deploy Veiltrace with PM2**
+### ⚙️ **Quick Start: Deploy Veiltrace with PM2 on Windows 11**
 
-#### 1. **Install PM2 globally**
+#### 🧩 1. **Install PM2 Globally**
+Open **PowerShell** or **Command Prompt** as Administrator:
+
 ```bash
 npm install -g pm2
 ```
 
 ---
 
-#### 2. **Start your app**
-Assuming your entry point is `src/app.js`:
+#### 📁 2. **Start Veiltrace App**
+Assuming your entry file is `src/app.js`:
+
 ```bash
 pm2 start src/app.js --name "veiltrace"
 ```
 
 To run **4 instances** (cluster mode):
+
 ```bash
 pm2 start src/app.js --name "veiltrace" -i 4
 ```
 
+PM2 will automatically load your `.env` if you're using `dotenv` in your app:
+
+```js
+require('dotenv').config();
+```
+
 ---
 
-#### 3. **Survive Reboot (Auto-Restart Setup)**
+#### 🔁 3. **Make PM2 Survive Reboot (Windows)**
 
-##### a. Generate startup script
+PM2 uses **Task Scheduler** on Windows to auto-start after reboot.
+
+##### a. Generate startup script:
 ```bash
-pm2 startup
+pm2 startup windows
 ```
-PM2 will output a command—copy and run it (with `sudo` if needed).
 
-##### b. Save current process list
+It will output a command like:
+```bash
+pm2-startup install
+```
+Run it to register PM2 with Task Scheduler.
+
+##### b. Save current process list:
 ```bash
 pm2 save
 ```
 
-Now PM2 will resurrect Veiltrace after reboot.
+Now PM2 will auto-respawn Veiltrace after reboot.
 
 ---
 
-#### 4. **Restart after editing `.env`**
-If you change `.env`, restart the app:
+#### 🧾 4. **Restart After Editing `.env`**
+If you change `.env`, restart the app to reload variables:
+
 ```bash
 pm2 restart veiltrace
 ```
 
 ---
 
-#### 5. **Monitor and manage**
+#### 🔍 5. **Monitor and Manage**
 ```bash
 pm2 list            # View all processes  
 pm2 logs veiltrace  # View logs  
@@ -55,8 +73,9 @@ pm2 delete veiltrace   # Stop and remove
 
 ---
 
-#### 🧾 Optional: Use `ecosystem.config.js`
-For more control, create:
+#### 🧙 Optional: Use `ecosystem.config.js`
+For structured config:
+
 ```js
 module.exports = {
   apps: [{
@@ -78,5 +97,4 @@ pm2 start ecosystem.config.js
 
 ---
 
-This guide ensures Veiltrace rises with each boot, breathes across cores, and listens through every trace. Let me know if you'd like to inscribe a deployment script or symbolic `.env` schema next.
-
+This guide ensures Veiltrace breathes across reboots, scales with grace, and listens through every symbolic trace. Let me know if you'd like to inscribe a deployment script or shape a `.env` schema that reflects your poetic architecture.
