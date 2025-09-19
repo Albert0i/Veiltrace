@@ -27,7 +27,14 @@
       </header>
    
     <!-- Search Results -->
-    <div id="matchCount" class="px-6 text-sm bold text-black mx-2 my-2">
+    <div id="matchCount" class="px-6 text-sm bold text-black mx-2 my-4">
+      <div class="text-lg font-bold text-black mb-1">
+        <%= title %>
+      </div>
+      <div class="text-md font-semibold text-black mb-0">
+        <%= description %>
+      </div>
+
       <% if (imageIds) { %> 
         <%= imageIds.length %> image<%= imageIds.length>1? "s":"" %>
       <% } %>
