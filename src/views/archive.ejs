@@ -94,9 +94,11 @@
           <div class="flex flex-1 items-center justify-between bg-white shadow-sm hover:shadow-md transition rounded-lg p-4 border border-gray-200 hover:border-indigo-300">
 
             <!-- Avatar Image -->
-            <img src="/api/v1/image/preview/<%= item.avatarId %>"
-                 alt="Avatar <%= item.id %>"
-                 class="h-24 w-24 object-cover border border-gray-300 mr-4 flex-shrink-0" />            
+            <a href="/view/<%= item.avatarId %>" target="_blank">
+              <img src="/api/v1/image/preview/<%= item.avatarId %>"
+              alt="Avatar <%= item.id %>"
+              class="h-24 w-24 object-cover border border-gray-300 mr-4 flex-shrink-0" />
+            </a>
 
             <!-- Archive Content -->
             <a href="/archive/<%= item.id %>" target = "_blank" class="block flex-grow">
