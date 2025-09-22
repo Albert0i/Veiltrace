@@ -50,7 +50,7 @@ CREATE OR REPLACE TABLE archivetrace
   id INT(11) NOT NULL AUTO_INCREMENT,
   avatarId int(11) NOT NULL DEFAULT(0), 
   title VARCHAR(191) NOT NULL,
-  description VARCHAR(191) DEFAULT NULL,
+  description text DEFAULT NULL,
   -- imageIds LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   imageIds JSON CHECK (JSON_VALID(imageIds)),
 

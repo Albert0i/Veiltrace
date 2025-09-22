@@ -102,15 +102,26 @@
 
             <!-- Archive Content -->
             <a href="/archive/<%= item.id %>" target = "_blank" class="block flex-grow">
-              <div class="text-lg font-bold text-black mb-1">
+              <div class="text-lg font-bold text-black mb-1 ml-4">
                 <%= item.title %>
               </div>
 
-              <div class="text-md font-semibold text-black mb-0">
+              <!-- <div class="text-md font-semibold text-black mb-0">
                 <%= item.description %>
+              </div> -->
+              <div class="text-md font-semibold text-black mb-0 ml-4">
+                <% 
+                  const words = item.description.trim().split(/\s+/);
+                  const isLong = words.length > 20;
+                  const shortDesc = isLong ? words.slice(0, 20).join(' ') + '...' : item.description;
+                %>
+                <%= shortDesc %>                
+                <% if (isLong) { %>
+                  
+                <% } %>
               </div>
 
-              <div class="text-sm text-gray-900 semi-bold">
+              <div class="text-sm text-gray-900 semi-bold ml-4">
                 <p><strong>Created at</strong>: <%= item.createdAt %></p>
                 <% if (item.updatedAt) { %>
                   <p><strong>Updated at</strong>: <%= item.updatedAt %></p>
