@@ -20,7 +20,6 @@
   
         <!-- Image Display Section -->
         <section class="text-center">
-          <!-- Image Container -->
           <div id="image-container" class="overflow-hidden relative inline-block w-full max-w-4xl mx-auto">
             <img id="veiltrace-image"
                 src="/api/v1/image/view/<%= id %>"
@@ -29,15 +28,12 @@
                 draggable="false">
           </div>
 
-          <!-- Interaction Controls -->
           <div class="mt-4 flex flex-col items-center space-y-3">
-            <!-- Zoom Slider -->
             <div class="flex items-center space-x-2">
               <input type="range" id="zoom-slider" min="100" max="500" value="100" class="w-64">
               <span id="zoom-percent" class="text-sm text-gray-600">Zoom: 100%</span>
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex space-x-4">
               <button id="rotate-btn"
                       class="px-4 py-1 text-sm bg-gray-700 text-white rounded hover:bg-gray-800 transition">
@@ -51,8 +47,7 @@
           </div>
         </section>
 
-        <!-- Viewer Script -->
-        <script>
+        <script type="text/javascript">
           const image = document.getElementById('veiltrace-image');
           const container = document.getElementById('image-container');
           const slider = document.getElementById('zoom-slider');
@@ -65,7 +60,7 @@
           let currentX = 0, currentY = 0;
 
           function updateTransform() {
-            image.style.transform = `scale(${scale}) rotate(${rotation}deg) translate(${currentX}px, ${currentY}px)`;
+            image.style.transform = `rotate(${rotation}deg) scale(${scale}) translate(${currentX}px, ${currentY}px)`;
             image.style.cursor = scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default';
           }
 
@@ -76,14 +71,16 @@
             const scaledWidth = (isRotated ? image.naturalHeight : image.naturalWidth) * scale;
             const scaledHeight = (isRotated ? image.naturalWidth : image.naturalHeight) * scale;
 
-            const maxOffsetX = Math.max(0, (scaledWidth - containerRect.width) / 2);
-            const maxOffsetY = Math.max(0, (scaledHeight - containerRect.height) / 2);
+            const containerWidth = containerRect.width;
+            const containerHeight = containerRect.height;
 
-            currentX = Math.min(maxOffsetX, Math.max(-maxOffsetX, currentX));
-            currentY = Math.min(maxOffsetY, Math.max(-maxOffsetY, currentY));
+            const maxX = Math.max(0, (scaledWidth - containerWidth) / 2);
+            const maxY = Math.max(0, (scaledHeight - containerHeight) / 2);
+
+            currentX = Math.min(maxX, Math.max(-maxX, currentX));
+            currentY = Math.min(maxY, Math.max(-maxY, currentY));
           }
 
-          // Zoom via slider
           slider.addEventListener('input', () => {
             scale = slider.value / 100;
             zoomText.textContent = `Zoom: ${slider.value}%`;
@@ -92,7 +89,6 @@
             updateTransform();
           });
 
-          // Zoom via scroll
           image.addEventListener('wheel', (e) => {
             const delta = e.deltaY;
             const newScale = scale + delta * -0.001;
@@ -108,7 +104,6 @@
             updateTransform();
           });
 
-          // Rotate
           document.getElementById('rotate-btn').addEventListener('click', () => {
             rotation = (rotation + 90) % 360;
             currentX = 0;
@@ -116,7 +111,6 @@
             updateTransform();
           });
 
-          // Drag-to-pan with rotation-aware logic and strict containment
           image.addEventListener('mousedown', (e) => {
             if (scale > 1) {
               isDragging = true;
@@ -142,7 +136,7 @@
             let rotatedX = dx;
             let rotatedY = dy;
 
-            switch (rotation) {
+            switch (rotation % 360) {
               case 90:
                 rotatedX = dy;
                 rotatedY = -dx;
