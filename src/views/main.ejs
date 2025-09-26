@@ -129,6 +129,17 @@
               </label>
             </div>
 
+            <div class="flex items-center space-x-6 mt-2">
+              <!-- Hybrid Search Radio -->
+              <label>
+                <input type="radio" name="stype" value="hybrid" <%= stype === 'hybrid' ? 'checked' : '' %>>
+                Hybrid Search
+              </label>
+              <span>
+                (Reciprocal Rank Fusion, <strong>slow</strong>) 
+              </span>
+            </div>
+
           </div>
 
         </div>
@@ -214,6 +225,9 @@
               <!-- Top Overlay -->
               <div class="absolute top-2 left-2 bg-white bg-opacity-80 px-2 py-1 rounded text-xs font-medium flex items-center space-x-2">
                 <span><%= index + 1 %></span>
+                <% if (item.rrfScore) { %>
+                  <span>Score: <%= item.rrfScore.toFixed(2) %></span>
+                <% } %>
                 <% if (item.relevance) { %>
                   <span>Rel: <%= item.relevance.toFixed(2) %></span>
                 <% } %>

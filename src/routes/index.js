@@ -242,7 +242,6 @@ router.get('/archive/:id', async (req, res) => {
 })  
 
 
-
 async function fetchSearchResults(query, stype, mode, expansion, useImageId, limit) {
   const params = new URLSearchParams({
     query: encodeURIComponent(query),
@@ -260,7 +259,10 @@ async function fetchSearchResults(query, stype, mode, expansion, useImageId, lim
     case "semantic":
       stype = "se"
       break;
-    default:
+    case "hybrid":
+      stype = "hs"
+      break;
+    default:      
       stype = ""
   }
   const searchUrl = `http://${HOST}:${PORT}/api/v1/image/search${stype}?${params.toString()}`;

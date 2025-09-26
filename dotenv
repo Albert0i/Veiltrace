@@ -3,4 +3,13 @@ PORT=3000
 
 MODEL_NAME=nomic-embed-text-v1.5.f16.gguf
 
+# Weigh for Full-text score in Hybrid Search 
+KFT=1
+# Weigh for Semantic score in Hybrid Search
+KSE=1
+# Note: 
+# Make K value lower for search type you want to prioritize
+# Make K value higher for search type you want to deprioritize
+# For best results, we recommended a number between one and sixty. 
+
 DATABASE_URL="mysql://root:root@localhost:3306/veiltrace"

@@ -255,15 +255,16 @@ router.get('/searchft', async (req, res) => {
 
   if (!query) return res.status(400).json({ message: 'Missing search query' });
 
-  const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
-  const result = await prisma.$queryRawUnsafe(`
-                          SELECT  id, visited, updatedAt, 
-                                  MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
-                          FROM imagetrace
-                          WHERE MATCH(description) AGAINST(? ${modifier})
-                          ORDER BY relevance DESC
-                          LIMIT ? OFFSET ?;
-                        `, query, query, limit, offset);
+  //const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
+  // const result = await prisma.$queryRawUnsafe(`
+  //                         SELECT  id, visited, updatedAt, 
+  //                                 MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
+  //                         FROM imagetrace
+  //                         WHERE MATCH(description) AGAINST(? ${modifier})
+  //                         ORDER BY relevance DESC
+  //                         LIMIT ? OFFSET ?;
+  //                       `, query, query, limit, offset);
+  const result = await findImages(query, mode, offset, limit, expansion)
 
   res.status(result.length>0?200:204).json(result);
 });
@@ -279,43 +280,155 @@ router.get('/searchse', async (req, res) => {
 
   if (!query) return res.status(400).json({ message: 'Missing search query' });
 
-    // Find similar documents 
+  // Find similar documents 
   let result = []
   if (useImageId) {
     const imageId = parseInt(query, 10); // base 10
 
     if (isNaN(imageId)) {
-      return res.status(400).json({ message: `Invalid imageId '${imagdId}'` });      
+      return res.status(400).json({ message: `Invalid imageId '${imageId}'` });
     }
     //console.log('imageId =', imageId)
-    result = await prisma.$queryRaw`
-                      SELECT id, visited, updatedAt,
-                             VEC_DISTANCE_COSINE(
-                                embedding,
-                                (SELECT embedding from imagetrace WHERE id=${imageId})
-                              ) AS distance, 
-                             id
-                      FROM imagetrace 
-                      ORDER BY 4 ASC
-                      LIMIT ${limit} OFFSET ${offset};
-                    `; 
+    // result = await prisma.$queryRaw`
+    //                   SELECT id, visited, updatedAt,
+    //                          VEC_DISTANCE_COSINE(
+    //                             embedding,
+    //                             (SELECT embedding from imagetrace WHERE id=${imageId})
+    //                           ) AS distance, 
+    //                          id
+    //                   FROM imagetrace 
+    //                   ORDER BY 4 ASC
+    //                   LIMIT ${limit} OFFSET ${offset};
+    //                 `; 
+    result = await findSimilarImagesWithImageId(imageId, offset, limit)
   } else {
-    const { vector } = await context.getEmbeddingFor(query);
-    //console.log('vector =', vector)
-    result = await prisma.$queryRaw`
-                      SELECT id, visited, updatedAt,
-                            VEC_DISTANCE_COSINE(
-                                embedding,
-                                VEC_FromText(${JSON.stringify(vector)})
-                            ) AS distance
-                      FROM imagetrace 
-                      ORDER BY 4 ASC
-                      LIMIT ${limit} OFFSET ${offset};
-                    `; 
+    // const { vector } = await context.getEmbeddingFor(query);
+    // //console.log('vector =', vector)
+    // result = await prisma.$queryRaw`
+    //                   SELECT id, visited, updatedAt,
+    //                         VEC_DISTANCE_COSINE(
+    //                             embedding,
+    //                             VEC_FromText(${JSON.stringify(vector)})
+    //                         ) AS distance
+    //                   FROM imagetrace 
+    //                   ORDER BY 4 ASC
+    //                   LIMIT ${limit} OFFSET ${offset};
+    //                 `; 
+    result = await findSimilarImages(query, offset, limit) 
   }
 
   res.status(result.length>0?200:204).json(result);
 });
+
+// Full-text Search 
+async function findImages(query, mode, offset, limit, expansion) {
+  const modifier = expansion ? 'WITH QUERY EXPANSION' : 'IN ' + mode + ' MODE';
+
+  const result = await prisma.$queryRawUnsafe(`
+                          SELECT  id, visited, updatedAt, 
+                                  MATCH(description) AGAINST(? IN ${mode} MODE) AS relevance
+                          FROM imagetrace
+                          WHERE MATCH(description) AGAINST(? ${modifier})
+                          ORDER BY relevance DESC
+                          LIMIT ? OFFSET ?;
+                        `, query, query, limit, offset);
+  
+  return result
+}
+
+// Semantic Search with text 
+async function findSimilarImages(query, offset, limit) {
+  const { vector } = await context.getEmbeddingFor(query);
+  //console.log('vector =', vector)
+
+  const result = await prisma.$queryRaw`
+                          SELECT id, visited, updatedAt,
+                                VEC_DISTANCE_COSINE(
+                                    embedding,
+                                    VEC_FromText(${JSON.stringify(vector)})
+                                ) AS distance
+                          FROM imagetrace 
+                          ORDER BY 4 ASC
+                          LIMIT ${limit} OFFSET ${offset};
+                        `; 
+
+  return result
+}
+
+// Semantic Search with Image Id 
+async function findSimilarImagesWithImageId(imageId, offset, limit) {
+  const result = await prisma.$queryRaw`
+                          SELECT id, visited, updatedAt,
+                                VEC_DISTANCE_COSINE(
+                                    embedding,
+                                    (SELECT embedding from imagetrace WHERE id=${imageId})
+                                  ) AS distance, 
+                                id
+                          FROM imagetrace 
+                          ORDER BY 4 ASC
+                          LIMIT ${limit} OFFSET ${offset};
+                        `; 
+
+  return result
+}
+ 
+
+// GET http://localhost:3000/api/v1/image/searchhs?query=chinchilla&offset=0&limit=10
+router.get('/searchhs', async (req, res) => {
+  const query = req.query.query?.trim();
+  const mode = req.query.mode === 'boolean' ? 'BOOLEAN' : 'NATURAL LANGUAGE';
+  const offset = parseInt(req.query.offset) || 0;
+  const limit = parseInt(req.query.limit) || 20;
+  const expansion = req.query.expansion === 'true'; // ← default is false 
+  
+  //console.log('hybrid >> query =', query, ", mode =", mode, ", expansion =", expansion, ", offset =", offset, ", limit =", limit, ', kft =', process.env.KFT, ', kse =', process.env.KSE)
+
+  if (!query) return res.status(400).json({ message: 'Missing search query' });
+
+  // Find documents with Full-text search 
+  const ft = findImages(query, mode, offset, limit, expansion)
+  // Find documents with Semantic search 
+  const se = findSimilarImages(query, offset, limit) 
+  
+  // Get result in one go
+  const [resultft, resutlse] = await Promise.all([ft, se])
+  //console.log('resultft = ', resultft)
+  //console.log('resultse = ', resutlse)
+  
+  const result = calculateRRF(resultft, resutlse, process.env.KFT, process.env.KSE, limit)
+  //console.log('result =', result)
+
+  res.status(result.length>0?200:204).json(result);
+});
+
+// Function to calculate "Reciprocal Rank Fusion"
+function calculateRRF(resultft, resultse, kft = 1, kse = 1, limit = 20) {
+  const scores = new Map();
+
+  // Helper to assign RRF scores from a ranked list
+  function assignScores(results, k) {
+    results.forEach((item, index) => {
+      const id = item.id || JSON.stringify(item); // Use unique ID or fallback
+      const score = 1 / (k + index + 1); // rank starts at 1
+      if (!scores.has(id)) {
+        scores.set(id, { item: { ...item }, total: 0 });
+      }
+      scores.get(id).total += score;
+    });
+  }
+
+  assignScores(resultft, kft);
+  assignScores(resultse, kse);
+
+  // Convert to array, attach score, and sort by total RRF score descending
+  const fused = Array.from(scores.values())
+    .map(({ item, total }) => ({ ...item, rrfScore: total }))
+    .sort((a, b) => b.rrfScore - a.rrfScore)
+    .slice(0, limit); // Apply limit
+
+  return fused;
+}
+
 
 // GET http://localhost:3000/api/v1/image/status
 router.get('/status', async (req, res) => {
