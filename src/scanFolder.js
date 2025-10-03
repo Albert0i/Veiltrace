@@ -13,7 +13,9 @@
 import fs from 'fs';
 import path from 'path';
 
-const IMG_EXTENSIONS = /\.(jpg|jpeg|png|webp|bmp|gif|tiff)$/i;
+//const IMG_EXTENSIONS = /\.(jpg|jpeg|png|webp|bmp|gif|tiff)$/i;
+const IMG_EXTENSIONS = /\.(jpg|jpeg|png|bmp|gif|tiff)$/i;
+
 const DEFAULT_FOLDER = path.resolve('./img');
 const DATA_FOLDER = path.resolve('./data');
 
