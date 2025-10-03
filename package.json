@@ -8,7 +8,8 @@
     "chat": "bin\\llama-mtmd-cli.exe -m models\\gemma-3-4b-it-Q6_K.gguf --mmproj models\\mmproj-gemma-3-4b-it-f16.gguf",
     "scan": "node src/scanFolder.js",
     "process": "node src/processFolder.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "start": "pm2 start src/app.js --name \"veiltrace\" -i 4"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

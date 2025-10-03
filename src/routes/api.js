@@ -92,12 +92,29 @@ router.get('/preview/:id', async (req, res) => {
     const result = await prisma.imagetrace.findUnique({
       where: { id }, 
       select: { 
-        miniature: true
+        miniature: true,
+        fullPath: true
       }
     })
 
     if (!result?.miniature) {
-      return res.status(404).json({ message: 'Preview not found' });
+      // Begin fix (2025/10/01)
+      // If no miniature is found, try to return the source image as a last resort!!!  
+      //return res.status(404).json({ message: 'Preview not found' });
+      if (!result.fullPath) {
+        return res.status(404).json({ message: `Image not found for id '${id}'` });
+      }
+    
+      const filePath = path.resolve(result.fullPath);
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: `Image not found on disk for id '${id}'` });
+      }
+
+      console.log(`Warning: No miniature found for id '${id}', use source image instead...`)
+      const mimeType = mime.getType(filePath) || 'application/octet-stream';
+      res.setHeader('Content-Type', mimeType);
+      return res.status(200).sendFile(filePath);
+      // End fix (2025/10/01)
     }
   
     res.set('Content-Type', 'image/jpeg');  // or 'image/png' if needed

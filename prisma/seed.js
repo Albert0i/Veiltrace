@@ -49,21 +49,28 @@ async function seed() {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
+    // Get the record to be processed. 
+    const record = JSON.parse(trimmed);
+
+    // Normalize timestamps      
+    const createdAt = new Date(record.createdAt || Date.now());
+    //const indexedAt = new Date(Date.now());
+    const indexedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    const { meta, content } = splitDescription(record.description, '\n\n');
+    
+    const { vector } = await context.getEmbeddingFor(content);  
+
+    let miniature = null; 
     try {
-      const record = JSON.parse(trimmed);
+        miniature = await sharp(record.fullPath)
+                            .resize(DEFAULT_MINIATURE, DEFAULT_MINIATURE, { fit: 'cover' })
+                            .jpeg({ quality: 80 })
+                            .toBuffer();
+    } catch (err) {
+        console.error(`❌ Failed on creating miniature on line ${count + 1}: ${err.message}`);
+    }
 
-      // Normalize timestamps      
-      const createdAt = new Date(record.createdAt || Date.now());
-      //const indexedAt = new Date(Date.now());
-      const indexedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-      const { meta, content } = splitDescription(record.description, '\n\n');
-      
-      const { vector } = await context.getEmbeddingFor(content);  
-      const miniature = await sharp(record.fullPath)
-        .resize(DEFAULT_MINIATURE, DEFAULT_MINIATURE, { fit: 'cover' })
-        .jpeg({ quality: 80 })
-        .toBuffer();
-
+    try {
         await prisma.$executeRaw`
                 INSERT INTO imagetrace ( imageName, fullPath, fileFormat, fileSize, meta, 
                                          description, embedding, miniature, indexedAt, createdAt ) 
@@ -72,34 +79,16 @@ async function seed() {
                   ON DUPLICATE KEY 
                   UPDATE updateIdent = updateIdent + 1;
                 `;  
-      // await prisma.imagetrace.upsert({
-      //   where: { fullPath: record.fullPath },
-      //   update: {
-      //     updateIdent: { increment: 1 },
-      //   },
-      //   create: {
-      //     imageName: record.imageName,
-      //     fullPath: record.fullPath,
-      //     fileFormat: record.fileFormat.toUpperCase(),
-      //     fileSize: record.fileSizeKB,
-      //     meta, 
-      //     description: content,
 
-      //     miniature,
-      //     indexedAt: indexedAt.toISOString(),
-      //     createdAt: createdAt.toISOString()
-      //   }
-      // });
-
-      count++;
-      console.log(`✅ Upserted ${count}: ${record.imageName}`);
+        count++;
+        console.log(`✅ Upserted ${count}: ${record.imageName}`);
     } catch (err) {
-      console.error(`❌ Failed on line ${count + 1}: ${err.message}`);
+        console.error(`❌ Failed on upserting on line ${count + 1}: ${err.message}`);
     }
   }
 
   await prisma.$disconnect();
-  console.log(`🌿 Seeding complete — ${count} records processed`);
+  console.log(`🌿 Seeding complete — ${count} records successfully`);
 }
 
 /*
