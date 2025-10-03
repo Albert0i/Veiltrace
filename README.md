@@ -6,7 +6,7 @@
 #### Prologue 
 Hello my friend, I am here to pen down what I was doing in the past few months. Everybody takes photos and most of us already have hundreds and thousands by now. In the year of 2025, everybody is doing AI things, an idea has dawned upon me all of a sudden... Can I search by describing them? "A man dresses in white sitting with a girl in the office..." is a common scenario but I just can't remember in which year and on what event? 
 
-The cornerstone is the ability to grab description from photos, which is done by dint of AI. Plus 
+The cornerstone is the ability to grab description from photos, which is done by dint of AI. 
 
 If you cherish meoories, believe me, veiltrace is written for you. 
 
