@@ -241,6 +241,47 @@ router.get('/archive/:id', async (req, res) => {
   }
 })  
 
+// GET http://localhost:3000/slideshow/:id
+router.get('/slideshow/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  
+  if (isNaN(id)) 
+    return res.status(400).json({ message: `Invalid id '${req.params.id}'` })
+
+  try {
+    const response = await fetch(`http://${HOST}:${PORT}/api/v1/image/archive/${id}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+  
+    const text = await response.text();
+    let data = []
+    
+    if (!text) {
+      //throw new Error('Empty response body');
+      // console.log(`Empty response body for ${params.get('stype')} query '${query}'`)
+      return data; 
+    }
+    
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      throw new Error('Invalid JSON: ' + err.message);
+    }    
+
+    data.imageIds = JSON.parse(data.imageIds)
+    const interval = process.env.INTERVAL || 3000; 
+    data.interval = parseInt(interval, 10)
+
+    //console.log('data =', data)
+    res.render('slideShow', data )
+  } catch (error) {
+    console.error('Search error:', error);
+    console.log('searchUrl =', searchUrl)
+    return null; 
+  }
+})
 
 async function fetchSearchResults(query, stype, mode, expansion, useImageId, limit) {
   const params = new URLSearchParams({

@@ -12,4 +12,7 @@ KSE=1
 # Make K value higher for search type you want to deprioritize
 # For best results, we recommended a number between one and sixty. 
 
+# Slide show interval in ms, default is 3000, 3 seconds 
+INTERVAL=3000
+
 DATABASE_URL="mysql://root:root@localhost:3306/veiltrace"
