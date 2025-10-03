@@ -82,8 +82,8 @@
             // Calculate max allowed translation in each direction
             // const maxX = Math.max(0, (scaledWidth - containerWidth) / 2);
             // const maxY = Math.max(0, (scaledHeight - containerHeight) / 2);
-            const maxX = Math.max(0, (scaledWidth - containerWidth) / 6);
-            const maxY = Math.max(0, (scaledHeight - containerHeight) / 6);
+            const maxX = Math.max(0, (scaledWidth - containerWidth) / 4);
+            const maxY = Math.max(0, (scaledHeight - containerHeight) / 4);
         
             // Clamp current translation to within bounds
             currentX = Math.min(maxX, Math.max(-maxX, currentX));
@@ -100,21 +100,21 @@
           });
         
           // 🖱️ Mouse wheel zoom interaction
-          image.addEventListener('wheel', (e) => {
-            const delta = e.deltaY;                            // Scroll direction
-            const newScale = scale + delta * -0.001;           // Adjust scale based on scroll
+          // image.addEventListener('wheel', (e) => {
+          //   const delta = e.deltaY;                            // Scroll direction
+          //   const newScale = scale + delta * -0.001;           // Adjust scale based on scroll
         
-            // Prevent zooming beyond limits
-            if ((delta < 0 && scale >= 5) || (delta > 0 && scale <= 1)) return;
+          //   // Prevent zooming beyond limits
+          //   if ((delta < 0 && scale >= 5) || (delta > 0 && scale <= 1)) return;
         
-            e.preventDefault();                                // Prevent page scroll
-            scale = Math.max(1, Math.min(newScale, 5));        // Clamp scale between 1 and 5
-            slider.value = Math.round(scale * 100);            // Sync slider
-            zoomText.textContent = `Zoom: ${slider.value}%`;   // Update zoom display
-            currentX = 0;                                       // Reset translation
-            currentY = 0;
-            updateTransform();                                 // Apply new transform
-          });
+          //   e.preventDefault();                                // Prevent page scroll
+          //   scale = Math.max(1, Math.min(newScale, 5));        // Clamp scale between 1 and 5
+          //   slider.value = Math.round(scale * 100);            // Sync slider
+          //   zoomText.textContent = `Zoom: ${slider.value}%`;   // Update zoom display
+          //   currentX = 0;                                       // Reset translation
+          //   currentY = 0;
+          //   updateTransform();                                 // Apply new transform
+          // });
         
           // 🔄 Rotate image 90° clockwise on button click
           document.getElementById('rotate-btn').addEventListener('click', () => {
