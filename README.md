@@ -1,20 +1,17 @@
 ### Veiltrace
-```
-Each image is a breath. 
-Each line, a trace. 
-Walk slowly, write deliberately, 
-and remember with grace. 
-```
 
-> "Physical strength is enough only up to a certain point; who can help it if that very point is also very significant otherwise? No one can help it. That’s the way the world corrects itself in its course and keeps its balance. It’s an excellent, incredibly excellent arrangement, although dismal in other respects."
+> "Gradually, however, my memory returned. Or rather, I returned to it, and in it I found the recollection that was awaiting me."<br />The Fall by Camus, Albert
 
-> "Things that one usually dared not mention must be told to him openly, for otherwise he wouldn’t understand the most essential point."
 
 #### Prologue 
-Stepping on threshold of AI, I can do vector semantic search on text content by now. Naturally, the next step *should* be semantic search on images and more naturally turing my eyes on [node-llama-cpp](https://github.com/withcatai/node-llama-cpp) but found out that I can't... then swimming upstream till I met the father [llama-cpp](https://github.com/ggml-org/llama.cpp) and found out that I still can't... 
+Hello my friend, I am here to pen down what I was doing in the past few months. Everybody takes photos and most of us already have hundreds and thousands by now. In the year of 2025, everybody is doing AI things, an idea has dawned upon me all of a sudden... Can I search by describing them? "A man dresses in white sitting with a girl in the office..." is a common scenario but I just can't remember in which year and on what event? 
 
-It is said that "[When God Closes a Door, Does He Open a Window?](https://www.gty.org/blogs/B160203/when-god-closes-a-door-he-opens-a-window)". The [Multimodal Support in llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/README.md) capability is now bestowed upon `llama-cpp` via the new `llama-mtmd-cli`.
+The cornerstone is the ability to grab description from photos, which is done by dint of AI. Plus 
 
+If you cherish meoories, believe me, veiltrace is written for you. 
+
+
+#### I. [llamap.cpp](https://github.com/ggml-org/llama.cpp)
 > Multimodal support in `llama.cpp` works by encoding images into embeddings using a separate model component, and then feeding these embeddings into the language model.
 
 > This approach keeps the multimodal components distinct from the core `libllama` library. Separating these allows for faster, independent development cycles. While many modern vision models are based on Vision Transformers (ViTs), their specific pre-processing and projection steps can vary significantly. Integrating this diverse complexity directly into libllama is currently challenging. 
@@ -31,44 +28,61 @@ llama-mtmd-cli.exe ^
   --prompt "Describe the image in 100 words"
 ```
 
-Got my point? Instead of creating vector embedding from images directly, we can extract text desctiption from images, then we can search via text description. Or, further vectorizing the text description. 
+Got my idea? The very first step is to invoke `llama-mtmd-cli.exe` and ask for a description that fits our need with a proper prompt. After that we can use it for full-text search or further vectorize it for semantic search, which is another AI feature used. 
 
-Download the models from here: 
+Download two models from here: 
 - [google_gemma-3-4b-it-GGUF](https://huggingface.co/bartowski/google_gemma-3-4b-it-GGUF/blob/main/google_gemma-3-4b-it-Q6_K.gguf)
 - [mmproj-google_gemma-3-4b-it-f16.gguf](https://huggingface.co/bartowski/google_gemma-3-4b-it-GGUF/blob/main/mmproj-google_gemma-3-4b-it-f16.gguf)
 
 
-#### I. System Setup 
+#### II. Prepare the data 
 First of all , prepare image list by running: 
 ```
 npm run scan 
 ```
 
-By default, it scans all images in './img' folder. You can supply an folder name like so: 
+By default, it scans all images in `./img` folder. You can supply an folder name like so: 
 ```
-npm run scan -- d:\photos
+npm run scan -- d:\Pictures
+```
+
+Or so, if it contains space: 
+```
+npm run scan -- "d:\Pictures (2025-08-30)"
 ```
 
 You can also specify files created on and after a specified date. 
 ```
-npm run scan -- d:\photos 2025-09-10 
+npm run scan -- d:\Pictures 2025-09-01 
 ```
 
-`scanFolder.js` creates image list '.lst' with the same name of scanned folder in "./data" folder. 
+`scanFolder.js` creates image list `.lst` with the same name of scanned folder in `./data` folder. 
 
 Then, go ahead and process the image list by running: 
 ```
 npm run process
 ```
 
-By default, it processes "img.lst" saved in './data' folder. You can supply an another name like so: 
+By default, it processes `img.lst` in `./data` folder. You can supply an another name like so: 
 ```
-npm run process -- photos
+npm run process -- Pictures
 ```
 
-`processFolder.js` creates JSONL file with the same name of input argument. It is a time-consuming process which may take hours or days depending on entries in image list. Besides ".lst" and ".jsonl" files, a '.sav' and '.fail.lst' is used to keep the current processing image and any images failed to process. 
+Or so, if it contains space: 
+```
+npm run process -- "Pictures (2025-08-30)"
+```
 
-Create two tables in MariaDB:
+`processFolder.js` creates `.JSONL` file with the same name of input argument. Processing images is time-consuming and it may may take you hours or even days depending on entries in `.lst`. Besides `.lst` and `.jsonl` files, a `.sav` and `.fail.lst` are needed to keep track of the process. 
+
+![alt process1](imgx/process1.JPG)
+
+![alt process2](imgx/process2.JPG)
+
+
+#### II. Prepare the tables
+Create three tables in [MariaDB](https://mariadb.org/):
+
 `imagetrace`
 ```
 -- veiltrace.imagetrace definition
@@ -117,7 +131,33 @@ CREATE OR REPLACE TABLE vistatrace
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
 
-Generate database schema by inspecting database with: 
+`archivetrace`
+```
+-- veiltrace.archivetrace definition (with JSON array)
+CREATE OR REPLACE TABLE archivetrace 
+(
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  avatarId int(11) NOT NULL DEFAULT(0), 
+  title VARCHAR(191) NOT NULL,
+  description text DEFAULT NULL,
+  -- imageIds LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  imageIds JSON CHECK (JSON_VALID(imageIds)),
+
+  updatedAt VARCHAR(191) DEFAULT NULL,
+  createdAt VARCHAR(191) NOT NULL,
+  updateIdent INT(11) NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (id),
+  CHECK (JSON_VALID(imageIds))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+- `imagetrace` - For main image data
+- `vistatrace` - For visited log
+- `archivetrace` - For archive (album)
+
+
+Using [Prisma](https://www.prisma.io/) to generate database schema by introspection: 
 ```
 npx prisma db pull 
 ```
@@ -127,12 +167,22 @@ Generate prisma client code with:
 npx prisma generate 
 ```
 
-- [bge-small-en-v1.5-gguf](https://huggingface.co/CompendiumLabs/bge-small-en-v1.5-gguf) 384 dimensions;  
-- [Embedding-GGUF/nomic-embed-text-v1.5-GGUF](https://www.modelscope.cn/models/Embedding-GGUF/nomic-embed-text-v1.5-GGUF) 768 dimensions for long text.
+Download the model from here: 
+- [Embedding-GGUF/nomic-embed-text-v1.5-GGUF](https://www.modelscope.cn/models/Embedding-GGUF/nomic-embed-text-v1.5-GGUF) 768 dimensions for long text. 
 
 Seed database with: 
 ```
 npx prisma db seed
+```
+
+By default, it uses `img.jsonl` in `./data` folder. You can supply an another name like so: 
+```
+npx prisma db seed -- Pictures
+```
+
+Or so, if things get more complicated: 
+```
+npx prisma db seed ""D:/RU/Veiltrace/data/Pictures\ (2025-08-30).jsonl"" > seed-result.txt
 ```
 
 
@@ -144,9 +194,14 @@ npm run dev
 
 ![alt main](imgx/veiltrace-main.JPG)
 
+![alt archive](imgx/veiltrace-archive.JPG)
+
+![alt archive 2](imgx/veiltrace-archive2.JPG)
+
 Available URLs: 
 ```
 http://localhost:3000/ - Main page
+http://localhost:3000/archive - Archive page
 http://localhost:3000/view/:id - View page 
 http://localhost:3000/info - Info page 
 ```
@@ -161,6 +216,7 @@ http://localhost:3000/api/v1/image/type - Image types
 http://localhost:3000/api/v1/image/search - Text scan earch
 http://localhost:3000/api/v1/image/searchft - Full text search
 http://localhost:3000/api/v1/image/searchse - Semantic search
+http://localhost:3000/api/v1/image/searchhs - Hybrid search
 http://localhost:3000/api/v1/image/status - System status 
 ```
 
@@ -176,6 +232,7 @@ http://localhost:3000/api/v1/image/status - System status
 
 
 #### Epilogue
+> "the mind dominates the whole past, and the pain of living is over forever."<br />The Fall by Camus, Albert
 
 
-### EOF (2025/09/26)
+### EOF (2025/10/10)
