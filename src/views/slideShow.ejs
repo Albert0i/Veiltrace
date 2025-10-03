@@ -13,57 +13,58 @@
 </head>
 <body>
   <img id="slideshow-image" src="" alt="Slideshow Image">
-  <script>
-    const imageIds = <%= JSON.stringify(imageIds) %>;
-    const baseUrl = '/api/v1/image/view/';
-    const images = imageIds.map(id => `${baseUrl}${id}`);
 
-    let index = 0;
-    let paused = false;
-    let interval = <%= interval %>;
-    let timer;
-
-    const img = document.getElementById('slideshow-image');
-
+  <script type="text/javascript">
+    const imageIds = <%= JSON.stringify(imageIds) %>;     // Array of image IDs for slideshow
+    const baseUrl = '/api/v1/image/view/';                // Base API endpoint for full-size images
+    const images = imageIds.map(id => `${baseUrl}${id}`); // Construct full image URLs
+  
+    let index = 0;                  // Current image index
+    let paused = false;             // Whether slideshow is paused
+    let interval = <%= interval %>; // Time between slides (in ms)
+    let timer;                      // Reference to interval timer
+  
+    const img = document.getElementById('slideshow-image'); // DOM reference to image element
+  
     function showImage() {
-      img.style.opacity = 0;
+      img.style.opacity = 0;      // Fade out current image
       setTimeout(() => {
-        img.src = images[index];
-        img.style.opacity = 1;
-      }, 100);
+        img.src = images[index];  // Set new image source
+        img.style.opacity = 1;    // Fade in new image
+      }, 100);                    // Delay to allow fade-out
     }
-
+  
     function nextImage() {
-      index = (index + 1) % images.length;
-      showImage();
+      index = (index + 1) % images.length;  // Advance index, wrap around
+      showImage();                          // Display updated image
     }
-
+  
     function prevImage() {
-      index = (index - 1 + images.length) % images.length;
-      showImage();
+      index = (index - 1 + images.length) % images.length; // Decrement index, wrap around
+      showImage(); // Display updated image
     }
-
+  
     function startLoop() {
       timer = setInterval(() => {
-        if (!paused) nextImage();
-      }, interval);
+        if (!paused) nextImage(); // Advance only if not paused
+      }, interval); // Repeat every interval ms
     }
-
+  
     function stopLoop() {
-      clearInterval(timer);
+      clearInterval(timer); // Cancel interval timer
     }
-
+  
     document.addEventListener('keydown', (e) => {
       switch (e.key) {
-        case ' ': paused = !paused; break;
-        case 'Escape': window.close(); break;
-        case 'ArrowRight': nextImage(); break;
-        case 'ArrowLeft': prevImage(); break;
+        case ' ': paused = !paused; break; // Space toggles pause/resume
+        case 'Escape': window.close(); break; // Esc closes slideshow window
+        case 'ArrowRight': nextImage(); break; // Right arrow moves forward
+        case 'ArrowLeft': prevImage(); break; // Left arrow moves backward
       }
     });
-
-    showImage();
-    startLoop();
+  
+    showImage(); // Show first image
+    startLoop(); // Begin looping slideshow
   </script>
 </body>
 </html>
