@@ -4,6 +4,8 @@ import path from 'path';
 import { promises as fs } from 'fs';
 import os from 'os';
 import archiver from 'archiver';
+import multer from 'multer';
+import iconv from 'iconv-lite';
 
 const router = express.Router();
 const HOST = process.env.HOST || 'localhost';
@@ -282,6 +284,50 @@ router.get('/slideshow/:id', async (req, res) => {
     return null; 
   }
 })
+
+
+
+
+// The upload folder
+const uploadDir = path.resolve('./upload');
+
+// Multer config
+// Keep original and handle Chinese image name 
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => cb(null, uploadDir),
+  filename: (_, file, cb) => {
+    const raw = Buffer.from(file.originalname, 'binary');
+    const decoded = iconv.decode(raw, 'utf8');
+    //console.log('Decoded filename:', decoded);
+    cb(null, decoded);
+  }
+});
+
+const upload = multer({ storage });
+
+// GET /upload — render upload page
+router.get('/upload', async (req, res) => {
+  // Ensure upload folder exists
+  try {
+    await fs.access(uploadDir);
+  } catch {
+    await fs.mkdir(uploadDir);
+  }
+
+  res.render('upload', { message: "" });
+});
+
+// POST /upload — handle image uploads
+router.post('/upload', upload.array('images'), async (req, res) => {
+  const imgs = req.files.map(f => f.filename)
+  
+  console.log(`Uploaded images ${imgs}`)
+  //res.send('Images received. Albatross is processing your glyphs.');
+  res.render('upload', { message: `Uploaded images ${imgs}` });
+});
+
+
+
 
 async function fetchSearchResults(query, stype, mode, expansion, useImageId, limit) {
   const params = new URLSearchParams({
