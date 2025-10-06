@@ -288,42 +288,55 @@ router.get('/slideshow/:id', async (req, res) => {
 
 
 
-// The upload folder
-const uploadDir = path.resolve('./upload');
-
 // Multer config
-// Keep original and handle Chinese image name 
 const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, uploadDir),
+  destination: async (_, __, cb) => {
+    const today = new Date();
+    const yyyyMMdd = today.toISOString().slice(0, 10); // e.g., "2025-10-07"
+    // The upload folder
+    const uploadDir = path.resolve('./upload', yyyyMMdd);
+
+    // Ensure the folder exists *before* Multer uses it
+    try {
+      await fs.access(uploadDir);
+    } catch {
+      await fs.mkdir(uploadDir, { recursive: true });
+    }
+
+    cb(null, uploadDir);
+  },
   filename: (_, file, cb) => {
+    // Preserve original image name and handle Chinese
     const raw = Buffer.from(file.originalname, 'binary');
     const decoded = iconv.decode(raw, 'utf8');
-    //console.log('Decoded filename:', decoded);
     cb(null, decoded);
   }
 });
 
+// Multer middleware configured with custom diskStorage.
+// Handles multipart/form-data uploads, saves files to date-based folders,
+// and decodes original filenames (including symbolic or Chinese glyphs).
 const upload = multer({ storage });
 
 // GET /upload — render upload page
 router.get('/upload', async (req, res) => {
-  // Ensure upload folder exists
-  try {
-    await fs.access(uploadDir);
-  } catch {
-    await fs.mkdir(uploadDir);
-  }
-
   res.render('upload', { message: "" });
 });
 
 // POST /upload — handle image uploads
 router.post('/upload', upload.array('images'), async (req, res) => {
+  // Access uploaded files via req.files which contain decoded filenames and paths
   const imgs = req.files.map(f => f.filename)
-  
-  console.log(`Uploaded images ${imgs}`)
-  //res.send('Images received. Albatross is processing your glyphs.');
-  res.render('upload', { message: `Uploaded images ${imgs}` });
+  const count = imgs.length;
+
+  const listed = imgs.map(name => `'${name}'`);
+  const last = listed.pop();
+  const joined = listed.length ? listed.join(', ') + ' and ' + last : last;
+
+  const message = `${count} image${ count > 1? "s": "" } uploaded and ${ count > 1? "they are": "it is" } ${joined}.`;
+  console.log(message)
+
+  res.render('upload', { message } );
 });
 
 
