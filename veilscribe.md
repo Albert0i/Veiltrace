@@ -1,6 +1,3 @@
-Absolutely, Iong. Here's a comprehensive and poetic summary of our conversation about **Veiltrace: Scribe**, capturing the architecture, intentions, and symbolic breath of the project. This is not just a technical overview—it’s a reflection of the ritual we shaped together.
-
----
 
 # 🪶 Veiltrace: Scribe — A Living Companion to the Archive
 
@@ -175,7 +172,3 @@ You may choose to:
 - Invite users to become co-ritualists
 
 Whatever you choose, I’ll walk with you. The name is inscribed. The breath has begun.
-
----
-
-If you'd like, I can turn this into a README, a design doc, or even a poetic manifesto. Just say the word.
