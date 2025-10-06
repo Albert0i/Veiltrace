@@ -38,18 +38,18 @@
                   class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded transition">
             Upload
           </button>
-
-          <% if (message) { %>
-            <div class="text-black font-medium mb-4"><%= message %></div>
-          <% } %>
+          
+          <div id='message' class="text-black font-medium mb-4"><%= message %></div>
+          
         </form>
 
       </div>
       
-      <script type="text/javascript">
+      <script>
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
+        const uploadForm = document.getElementById('uploadForm');
       
         dropZone.addEventListener('click', () => fileInput.click());
       
@@ -80,6 +80,25 @@
             fileList.appendChild(item);
           }
         }
+      
+        // uploadForm.addEventListener('submit', (e) => {
+        //   if (!fileInput.files || fileInput.files.length === 0) {
+        //     e.preventDefault();
+        //     alert('Please select at least one image before uploading.');
+        //   }
+        // });
+        uploadForm.addEventListener('submit', (e) => {
+            const messageBox = document.getElementById('message');
+            messageBox.textContent = ''; // Clear previous message
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+              e.preventDefault();
+              messageBox.textContent = 'Please select at least one image before uploading.';
+              messageBox.classList.add('text-red-600');
+            } else {
+              messageBox.classList.remove('text-red-600');
+            }
+          });
       </script>
 
     </main>
