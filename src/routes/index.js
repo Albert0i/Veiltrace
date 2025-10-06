@@ -473,30 +473,3 @@ async function postUpdateVeilTrace(id, type='view') {
 }
 
 export default router;
-
-const savedLists = [
-  {
-    "id": 21,
-    "description": "Archive 2025-09-16T15:11:20.828Z",
-    "imageIds": "[7,14,21,28,1,9]",
-    "updatedAt": "2025-09-16T15:18:03.796Z",
-    "createdAt": "2025-09-16T15:11:20.828Z",
-    "updateIdent": 5
-  },
-  {
-    "id": 20,
-    "description": "Stars, staring and shinning on us over centries, can only be seen in dark nights.",
-    "imageIds": "[]",
-    "updatedAt": null,
-    "createdAt": "2025-09-16T15:11:10.833Z",
-    "updateIdent": 0
-  },
-  {
-    "id": 22,
-    "description": "Stars, staring and shinning on us over centries, can only be seen in dark nights.",
-    "imageIds": "[]",
-    "updatedAt": null,
-    "createdAt": "2025-09-16T15:13:54.231Z",
-    "updateIdent": 0
-  }
-]
