@@ -320,11 +320,15 @@ const upload = multer({ storage });
 
 // GET /upload — render upload page
 router.get('/upload', async (req, res) => {
-  res.render('upload', { message: "" });
+  const max = process.env.MAX_IMAGES_UPLOAD || 10
+
+  res.render('upload', { message: "", max });
 });
 
 // POST /upload — handle image uploads
 router.post('/upload', upload.array('images'), async (req, res) => {
+  const max = process.env.MAX_IMAGES_UPLOAD || 10
+  
   // Access uploaded files via req.files which contain decoded filenames and paths
   const imgs = req.files.map(f => f.filename)
   const count = imgs.length;
@@ -336,7 +340,7 @@ router.post('/upload', upload.array('images'), async (req, res) => {
   const message = `${count} image${ count > 1? "s": "" } uploaded and ${ count > 1? "they are": "it is" } ${joined}.`;
   console.log(message)
 
-  res.render('upload', { message } );
+  res.render('upload', { message, max } );
 });
 
 

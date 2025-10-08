@@ -15,4 +15,7 @@ KSE=1
 # Slide show interval in ms, default is 3000, 3 seconds 
 INTERVAL=3000
 
+# Maxinum number of images uploaded at one time, default is 10  
+MAX_IMAGES_UPLOAD=10
+
 DATABASE_URL="mysql://root:root@localhost:3306/veiltrace"
