@@ -317,7 +317,14 @@ const storage = multer.diskStorage({
 // Multer middleware configured with custom diskStorage.
 // Handles multipart/form-data uploads, saves files to date-based folders,
 // and decodes original filenames (including symbolic or Chinese glyphs).
-const upload = multer({ storage });
+//const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,  // 5MB per file
+    files: MAX_IMAGES_UPLOAD    // Max files per request
+  }
+});
 
 // GET /upload — render upload page
 router.get('/upload', async (req, res) => {  
