@@ -10,6 +10,7 @@ import iconv from 'iconv-lite';
 const router = express.Router();
 const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || 3000;
+const MAX_IMAGES_UPLOAD = process.env.MAX_IMAGES_UPLOAD || 10
 
 // GET http://localhost:3000/
 router.get('/', async (req, res) => {
@@ -319,16 +320,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // GET /upload — render upload page
-router.get('/upload', async (req, res) => {
-  const max = process.env.MAX_IMAGES_UPLOAD || 10
-
-  res.render('upload', { message: "", max });
+router.get('/upload', async (req, res) => {  
+  res.render('upload', { message: "", max: MAX_IMAGES_UPLOAD });
 });
 
 // POST /upload — handle image uploads
-router.post('/upload', upload.array('images'), async (req, res) => {
-  const max = process.env.MAX_IMAGES_UPLOAD || 10
-  
+router.post('/upload', upload.array('images', MAX_IMAGES_UPLOAD), async (req, res) => { 
   // Access uploaded files via req.files which contain decoded filenames and paths
   const imgs = req.files.map(f => f.filename)
   const count = imgs.length;
@@ -340,7 +337,9 @@ router.post('/upload', upload.array('images'), async (req, res) => {
   const message = `${count} image${ count > 1? "s": "" } uploaded and ${ count > 1? "they are": "it is" } ${joined}.`;
   console.log(message)
 
-  res.render('upload', { message, max } );
+  // Wait for 5 seconds... 
+  //await new Promise(r => setTimeout(r, 5000));
+  res.render('upload', { message, max: MAX_IMAGES_UPLOAD } );
 });
 
 
@@ -490,3 +489,8 @@ async function postUpdateVeilTrace(id, type='view') {
 }
 
 export default router;
+
+/*
+   multer
+   https://www.npmjs.com/package/multer
+*/
