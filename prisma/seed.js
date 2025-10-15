@@ -13,6 +13,8 @@ import fs from 'fs';
 import readline from 'readline';
 import path from 'path';
 import sharp from 'sharp';
+import crypto from 'crypto';
+import fsSync from 'fs';
 
 // node-llama-cpp 
 import {fileURLToPath} from "url";
@@ -70,12 +72,16 @@ async function seed() {
         console.error(`❌ Failed on creating miniature on line ${count + 1}: ${err.message}`);
     }
 
+    const hash = await hashFile(record.fullPath);
+
     try {
         await prisma.$executeRaw`
                 INSERT INTO imagetrace ( imageName, fullPath, fileFormat, fileSize, meta, 
-                                         description, embedding, miniature, indexedAt, createdAt ) 
+                                         description, embedding, miniature, hash, indexedAt, 
+                                         createdAt ) 
                   VALUES( ${record.imageName}, ${record.fullPath}, ${record.fileFormat.toUpperCase()}, ${record.fileSizeKB}, ${meta}, 
-                          ${content}, VEC_FromText(${JSON.stringify(vector)}), ${miniature}, ${indexedAt}, ${createdAt} ) 
+                          ${content}, VEC_FromText(${JSON.stringify(vector)}), ${miniature}, ${hash}, ${indexedAt}, 
+                          ${createdAt} ) 
                   ON DUPLICATE KEY 
                   UPDATE updateIdent = updateIdent + 1;
                 `;  
@@ -89,6 +95,17 @@ async function seed() {
 
   await prisma.$disconnect();
   console.log(`🌿 Seeding complete — ${count} records successfully`);
+}
+
+// 🔐 Generate SHA-256 hash of file contents
+async function hashFile(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fsSync.createReadStream(filePath);
+    stream.on('data', chunk => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', reject);
+  });
 }
 
 /*

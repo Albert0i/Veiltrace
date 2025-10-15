@@ -11,6 +11,7 @@ CREATE or replace TABLE imagetrace
   description text NOT NULL,
   embedding VECTOR(768) NOT NULL, 
   miniature longblob DEFAULT NULL,
+  hash varchar(64) NOT NULL,
   visited int(11) NOT NULL DEFAULT 0,
   updatedAt varchar(191) DEFAULT NULL,
   indexedAt varchar(191) NOT NULL,

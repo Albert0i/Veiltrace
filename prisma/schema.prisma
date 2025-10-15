@@ -18,6 +18,7 @@ model imagetrace {
   description String                     @db.Text
   embedding   Unsupported("vector(768)")
   miniature   Bytes?
+  hash        String                     @db.VarChar(64)
   visited     Int                        @default(0)
   updatedAt   String?
   indexedAt   String
