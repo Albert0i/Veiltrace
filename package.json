@@ -8,7 +8,9 @@
     "chat": "bin\\llama-mtmd-cli.exe -m models\\gemma-3-4b-it-Q6_K.gguf --mmproj models\\mmproj-gemma-3-4b-it-f16.gguf",
     "scan": "node src/scanFolder.js",
     "process": "node src/processFolder.js",
-    "dev": "nodemon src/app.js",
+    "start:dev": "nodemon src/app.js",
+    "build:css": "postcss ./src/public/styles/styles.css -o ./src/public/styles/build.css --watch",
+    "dev": "concurrently \"npm:build:css\" \"npm:start:dev\"",
     "start": "pm2 start src/app.js --name \"veiltrace\" -i 4"
   },
   "prisma": {
@@ -32,6 +34,13 @@
     "sharp": "^0.34.3"
   },
   "devDependencies": {
-    "prisma": "^6.15.0"
+    "@tailwindcss/postcss": "^4.1.17",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "prettier": "^3.6.2",
+    "prisma": "^6.15.0",
+    "tailwindcss": "^4.1.17"
   }
 }

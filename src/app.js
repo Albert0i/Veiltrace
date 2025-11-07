@@ -22,7 +22,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+// Define a route for the root URL ("/")
+/* app.get("/", (req, res) => {
+  // Render the 'index' view (index.ejs) and pass in some data
+  res.render("index", {
+      title: "Tracker App",
+      message: "Welcome to your Tailwind-powered tracker!",
+  });
+}); */
 app.use('/', indexRouter);
+
 app.use('/api/v1/image', apiRouter);
 app.use((req, res) => {
   res.status(404).render('404');
