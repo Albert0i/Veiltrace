@@ -60,7 +60,14 @@ async function seed() {
     const indexedAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
     const { meta, content } = splitDescription(record.description, '\n\n');
     
-    const { vector } = await context.getEmbeddingFor(content);  
+    //const { vector } = await context.getEmbeddingFor(content);  
+    let vector = null; 
+    try {
+      vector = (await context.getEmbeddingFor(content)).vector; 
+    } catch (err) {
+        console.error(`❌ Failed on creating vector embedding on line ${count + 1}: ${err.message}`);
+        continue; 
+    }
 
     let miniature = null; 
     try {
@@ -83,7 +90,9 @@ async function seed() {
                           ${content}, VEC_FromText(${JSON.stringify(vector)}), ${miniature}, ${hash}, ${indexedAt}, 
                           ${createdAt} ) 
                   ON DUPLICATE KEY 
-                  UPDATE updateIdent = updateIdent + 1;
+                  UPDATE description = ${record.description}, 
+                         updatedAt = ${indexedAt}, 
+                         updateIdent = updateIdent + 1;
                 `;  
 
         count++;

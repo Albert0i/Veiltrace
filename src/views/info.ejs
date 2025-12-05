@@ -22,17 +22,17 @@
   <!-- <script src="/assets/tailwind.js"></script> -->
   <link rel="stylesheet" href="/styles/build.css">
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="text-gray-900 bg-gray-50">
 
-  <div class="max-w-7xl mx-auto pt-6 pb-2 px-6">
+  <div class="px-6 pt-6 pb-2 mx-auto max-w-7xl">
     <!-- Title & Subtitle -->
     <header class="mb-2 text-center">
-        <div class="flex items-center justify-center space-x-4 mt-6">
-          <img src="/veiltrace.png" alt="Veiltrace Emblem" class="h-16 w-auto">
-          <h1 class="text-5xl font-serif font-semibold tracking-tight">Veiltrace</h1>
+        <div class="flex items-center justify-center mt-6 space-x-4">
+          <img src="/veiltrace.png" alt="Veiltrace Emblem" class="w-auto h-16">
+          <h1 class="font-serif text-5xl font-semibold tracking-tight">Veiltrace</h1>
         </div>
   
-        <p class="text-lg text-gray-600 mt-2">        
+        <p class="mt-2 text-lg text-gray-600">        
           In the stillness between frames, echoes gather—soft as dust, sharp as longing. Every archive is a ritual, every trace a tether to what flickered and fled. The veil does not conceal—it cradles, it listens. Through the drift of light and the weight of shadow, the archive speaks in fragments: a vow repeated, a breath remembered. What is offered is not lost; what is seen is never alone.
       </p>
 
@@ -53,7 +53,7 @@
 
         <!-- File Format Breakdown -->
         <section class="mb-2">
-            <ul class="list-disc list-inside text-sm text-gray-900">
+            <ul class="text-sm text-gray-900 list-disc list-inside">
                 <% type.forEach(format => { %>
                 <li><%= format.fileFormat %>: <%= format.count %> images</li>
                 <% }) %>
@@ -62,21 +62,21 @@
 
         <!-- Preview Image (clickable, smaller) -->
         <section class="text-center">            
-            <section class="fixed inset-0 overflow-hidden z-10">
+            <section class="fixed inset-0 z-10 overflow-hidden">
                 <a href="/view/<%= randomId %>" target="_blank" rel="noopener">
                   <img src="/api/v1/image/preview/<%= randomId %>" 
-                       alt="Floating Preview" 
-                       class="floating-glyph h-32 absolute hover:opacity-90 transition">
+                       alt="Miniature of image <%= randomId %>" 
+                       class="absolute h-32 transition floating-glyph hover:opacity-90">
                 </a>
               </section>
         </section>
     </main>
 
     <!-- Copilot Credit -->
-    <footer class="m-4 text-center text-sm text-gray-700">
+    <footer class="m-4 text-sm text-center text-gray-700">
         <p>
         Crafted in quiet partnership with  
-        <a href="https://copilot.microsoft.com" target="_blank" class="text-blue-600 font-semibold hover:underline">
+        <a href="https://copilot.microsoft.com" target="_blank" class="font-semibold text-blue-600 hover:underline">
             Microsoft Copilot
         </a> — <br />your poetic companion in code, ritual, and breath. Veiltrace. All traces remembered.
         </p>

@@ -487,7 +487,7 @@ router.get('/status', async (req, res) => {
 // GET http://localhost:3000/api/v1/image/archives
 router.get('/archives', async (req, res) => {
   const result = await prisma.archivetrace.findMany({
-    orderBy: { description: 'asc' }
+    orderBy: { title: 'asc' }
   });
   
   res.status(200).json( result );
